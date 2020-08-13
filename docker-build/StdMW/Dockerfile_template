@@ -1,0 +1,54 @@
+FROM debian:9
+
+# reminder, use {} around environmental variables, otherwise docker uses it as a literal
+
+LABEL edu.mda.bcb.name="Standardized Metabolomics Workbench Tool" \
+      edu.mda.bcb.version="<RELEASE_VERSION>" \
+      edu.mda.bcb.log="/usr/local/tomcat/logs/localhost.*.log"
+
+ENV TOMCAT_MAJOR=9 \
+    TOMCAT_VERSION=9.0.12 \
+    TOMCAT_HOME=/opt/tomcat \
+    CATALINA_HOME=/opt/tomcat \
+    CATALINA_OUT=/dev/null
+
+# install JDK, apt utils
+RUN apt-get update && \
+    apt-get upgrade -f -y && \
+    apt-get install -f -y apt-utils readline-common procps curl && \
+    apt-get install -f -y openjdk-8-jdk && \
+    apt-get clean
+
+# create and setup user
+# also, set permissions and ownerships on internal docker directories
+RUN mkdir /home/docker_tcga && \
+    useradd -l -s /bin/bash -d /home/docker_tcga -u <USERID> docker_tcga && \
+    chown -R docker_tcga:docker_tcga /home/docker_tcga
+
+RUN curl -jksSL -o /tmp/apache-tomcat.tar.gz http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
+    gunzip /tmp/apache-tomcat.tar.gz && \
+    tar -C /opt -xf /tmp/apache-tomcat.tar && \
+    mv /opt/apache-tomcat-${TOMCAT_VERSION} ${TOMCAT_HOME} && \
+    rm -rf ${TOMCAT_HOME}/webapps/docs && \
+    rm -rf ${TOMCAT_HOME}/webapps/ROOT && \
+    rm -rf ${TOMCAT_HOME}/webapps/examples && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    chown -R docker_tcga:docker_tcga ${TOMCAT_HOME} && \
+    ln -s /opt/apache-tomcat-${TOMCAT_VERSION} ${TOMCAT_HOME} && \
+    apt-get clean
+
+# copy server.xml to start compression - may need to be merged with above later
+COPY installations/server.xml ${CATALINA_HOME}/conf/server.xml
+RUN chown -R docker_tcga:docker_tcga ${CATALINA_HOME}/conf && \
+    chmod -R u+rwx ${CATALINA_HOME}/conf
+
+# copy installs
+# COPY is always done as root!!!!
+COPY installations/StdMW.war ${CATALINA_HOME}/webapps/.
+RUN chown -R docker_tcga:docker_tcga ${CATALINA_HOME}/webapps && \
+    chmod -R u+rwx ${CATALINA_HOME}/webapps
+
+# switch from root to docker_tcga user
+USER docker_tcga
+
+CMD ["/opt/tomcat/bin/catalina.sh", "run"]

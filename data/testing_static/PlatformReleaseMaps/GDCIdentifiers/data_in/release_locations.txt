@@ -1,0 +1,23 @@
+
+GDC references files are listed at:
+https://gdc.cancer.gov/about-data/data-harmonization-and-generation/gdc-reference-files"
+Current files in data were downloaded 2018-01-18-0915"
+mirna_mature.txt - (edited) contains only the HSA entries from miRNA database
+gencode.v22.annotation.gtf - RNASeq (GeneExpressionQuantification) and HTSeq
+////////////////////////////////////////////////////////////////////////////////////////////////////
+HGNC reference files downloaded from:
+ftp.ebi.ac.uk:/pub/databases/genenames/hgnc_complete_set.txt.gz
+Current files in data were downloaded 2018-01-18-0915"
+hgnc_complete_set.txt
+////////////////////////////////////////////////////////////////////////////////////////////////////
+HGNC reference files downloaded from:
+ftp.ebi.ac.uk:/pub/databases/genenames/hgnc_complete_set.txt.gz
+Current files in data were downloaded 2018-01-18-0915"
+hgnc_complete_set.txt
+////////////////////////////////////////////////////////////////////////////////////////////////////
+UCSC reference files downloaded from:
+http://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/kgXref.txt.gz
+Current files in data were downloaded 2018-01-18-0915"
+kgXref.txt
+
+

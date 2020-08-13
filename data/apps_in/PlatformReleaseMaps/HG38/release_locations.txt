@@ -1,0 +1,97 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+GDC references files are listed at:
+https://gdc.cancer.gov/about-data/data-harmonization-and-generation/gdc-reference-files
+Current files in data were downloaded 2018-08-03-1500
+
+####gene reference genome
+gencode.v22.annotation.gtf.zip	reference genome, "used in RNA-Seq alignment and by HTSeq"
+
+****gencode.v22.annotation.gtf
+1	column: chromosome chr# (1-23,X,Y,M)
+2	column: calling center
+3	column: gene, transcript, exon, (others)
+4	column: start location
+5	column: end location
+7	column: strand
+9	column: Entries from column 9 (<tag-name> "value"; )
+gene_id	Ensembl Gene Id
+transcript_id	Ensembl Transcript Id
+havana_gene	Havana Gene
+havana_transcript	Havana Transcript
+gene_name	Gene Symbol
+transcript_name	Transcript Symbol
+exon_id	Ensembl Exon Id
+exon_number	Exon Number
+
+
+####miRNA definitions
+mirna.txt.zip	list of miRNAs, from mirna_database.tar.gz, added headers from tables.sql
+mirna_chromosome_build.txt.zip	location of miRNAs, from mirna_database.tar.gz, added headers from tables.sql
+mirna_mature.txt.zip	list of mature miRNAs, from mirna_database.tar.gz, added headers from tables.sql
+mirna_pre_mature.txt.zip	map of mature to miRNA keys, from mirna_database.tar.gz, added headers from tables.sql
+
+****mirna.txt
+Filter mirna.txt by mirna_id starts with "hsa-" or auto_species = 22
+mirna_acc	Accension id MI0000060
+mirna_id	miRNA id hsa-let-7a-1
+auto_mirna	internal integer id
+
+****mirna_chromosome_build.txt
+auto_mirna	filter match to auto_mirna from mirna.txt
+xsome	chromosome "string" or chr# (1-23,X,Y, "string")
+contig_start	start location
+contig_end	end location
+strand	strand
+
+****mirna_pre_mature.txt
+auto_mirna	filter match to auto_mirna from mirna.txt
+auto_mature	filter match to auto_mature from mirna_mature.txt
+
+****mirna_mature.txt
+auto_mature	filter match to auto_mature from mirna_pre_mature.txt
+mature_name	hsa- name
+mature_acc	Mature Accension MIMAT0000062
+
+####SNP6
+****snp6.na35.liftoverhg38.txt.zip
+probeid	probe SNP_A-4295909 CN_1205045
+chr	1-23,X,Y
+pos	location
+strand	+ or -
+freqcnv	Masked Copy Number Segment for GISTIC analysis, please only keep probesets with freqcnv = FALSE
+Find match between this and gencode.v22.annotation.gtf to find gene matched...
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+UCSC reference files downloaded from:
+http://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/
+Current files in data were downloaded 2018-08-07-1300
+
+####translate ids
+
+****knownToEnsembl.txt.gz
+ucsc	ensembl_transcript
+uc001aak.4	ENST00000417324.1
+uc001aal.1	ENST00000335137.3
+
+****knownToRefSeq.txt 
+ucsc	ref_seq
+uc284nkr.1	NM_002929
+uc284nks.1	NM_002929
+uc284nku.1	NR_028064
+uc032mzh.1	NM_001282321
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Pull Methylation 450 probes from data files
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+Genes		unique	chromosome	start-loc	end-loc	strand
+Exons		unique	chromosome	start-loc	end-loc	strand
+Transcripts	unique	chromosome	start-loc	end-loc	strand
+Mirs		unique	mir-type
+SNP6		probe-id	chromosome	location	strand
+

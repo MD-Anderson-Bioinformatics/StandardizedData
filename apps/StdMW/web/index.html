@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+	<head>
+		<title>MDA Standardized Data Metabolomics Workbench Tool</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="knockout-3.5.1.js" type="text/javascript" charset="utf-8"></script>
+		<script src="jquery-3.4.1.min.js" type="text/javascript" charset="utf-8"></script>
+		<link href="StdMW.css" rel="stylesheet" type="text/css">
+		<script type="text/javascript">
+			/* global ko */
+
+			// this makes sure that nothing gets called until page and required JS files are loaded
+			var appview = null;
+			$(document).ready(function()
+			{
+				// Activates knockout.js
+				appview = new AppViewModel();
+				ko.applyBindings(appview);
+				setTimeout(function() {document.getElementById('alrt').style.display = "none";},3000);
+			});
+
+			// This is a simple *viewmodel* - JavaScript that defines the data and behavior of your UI
+			function AppViewModel()
+			{
+				var self = this;
+				
+				self.makeGuiVisible = ko.observable(false); //.extend({ deferred: true });
+				
+				self.listOfSummaries = ko.observableArray();
+				self.selectedSummary = ko.observable(null);
+				self.selectedSummaryKeys = ko.pureComputed(function()
+				{
+					return Object.keys(self.selectedSummary());
+				});
+				
+				////////////////////////////////////////////////////////////////
+				//// get list of summaries (studies) available
+				////////////////////////////////////////////////////////////////
+				$.ajax(
+				{
+					type: "GET",
+					dataType:'json',
+					async:true,
+					url: "studies",
+					cache: false,
+					success: function(theJson)
+					{
+						console.log("studies :" + JSON.stringify(theJson));
+						self.listOfSummaries(theJson);
+					},
+					error: function(jqXHR, textStatus, errorThrown)
+					{
+						console.log("studies :" + textStatus + " and " + errorThrown);
+						alert("studies :" + textStatus + " and " + errorThrown);
+					}
+				});
+				
+				////////////////////////////////////////////////////////////////
+				//// get list of analyses available for this study
+				////////////////////////////////////////////////////////////////
+				self.listOfAnalyses = ko.observableArray();
+				self.analysesKeys = ko.pureComputed(function()
+				{
+					var keys = [];
+					if (self.listOfAnalyses().length>0)
+					{
+						keys = Object.keys(self.listOfAnalyses()[0]);
+					}
+					return keys;
+				});
+				
+				self.loadAnalyses = function()
+				{
+					$.ajax(
+					{
+						type: "GET",
+						dataType:'json',
+						async:true,
+						url: "analyses",
+						cache: false,
+						data:
+						{
+							hash: self.selectedSummary().hash
+						},
+						success: function(theJson)
+						{
+							console.log("analyses :" + JSON.stringify(theJson));
+							self.listOfAnalyses.removeAll();
+							for(var i = 0; i < theJson.length; i++)
+							{
+								var obj = theJson[i];
+								console.log("analyses obj :" + JSON.stringify(obj));
+								self.listOfAnalyses.push(obj);
+							}
+						},
+						error: function(jqXHR, textStatus, errorThrown)
+						{
+							console.log("analyses :" + textStatus + " and " + errorThrown);
+							alert("analyses :" + textStatus + " and " + errorThrown);
+						}
+					});
+				};
+				
+				////////////////////////////////////////////////////////////////
+				//// download analyses data
+				////////////////////////////////////////////////////////////////
+				self.downloadAnalysisDataDC = function(theData, theEvent)
+				{
+					console.log("downloadAnalysisDataDC theHash = " + theData["hash"]);
+					window.location.href= 'addc?hash='+ theData["hash"];
+				};
+
+				self.downloadAnalysisDataMSC = function(theData, theEvent)
+				{
+					console.log("downloadAnalysisDataDC theHash = " + theData["hash"]);
+					window.location.href= 'admsc?hash='+ theData["hash"];
+				};
+
+				self.downloadAnalysisDataRaw = function(theData, theEvent)
+				{
+					console.log("downloadAnalysisDataDC theHash = " + theData["hash"]);
+					window.location.href= 'adraw?hash='+ theData["hash"];
+				};
+				
+				////////////////////////////////////////////////////////////////
+				//// downloadBatches
+				////////////////////////////////////////////////////////////////
+				self.downloadBatches = function(theData, theEvent)
+				{
+					console.log("downloadBatches theHash = " + theData["hash"]);
+					window.location.href= 'factors?hash='+ theData["hash"];
+				};
+				
+				////////////////////////////////////////////////////////////////
+				//// manual subscriptions
+				////////////////////////////////////////////////////////////////
+				self.selectedSummary.subscribe(function()
+				{
+					console.log("selectedSummary changes, clear listOfAnalyses");
+					self.listOfAnalyses.removeAll();
+				});
+
+				////////////////////////////////////////////////////////////////
+				//// this is used to prevent "flickering" characteristic on load with knockoutJS
+				////////////////////////////////////////////////////////////////
+				self.makeGuiVisible(true);
+			} //End Appview Model
+		</script>
+	</head>
+	<body style="display: none;" data-bind="visible: $root.makeGuiVisible()">
+		<div id='alrt'>
+			<p onclick="document.getElementById('alrt').style.display = 'none';"><small>Legal notice: Unauthorized access to the network is prohibited. This system is for the use of authorized users only. 
+				Individuals using this computer system without authority, or in excess of their authority, are subject to having all of 
+				their activities on this system monitored and recorded by system personnel. In the course of monitoring individuals 
+				improperly using this system, or in the course of system maintenance, the activities of authorized users may also be 
+				monitored. Anyone using this system expressly consents to such monitoring and is advised that if such monitoring reveals 
+				possible evidence of criminal activity, system personnel may provide the evidence of such monitoring to law enforcement officials.
+				(Auto-displayed notice will close after 3 seconds or click this banner to hide.)</small>
+			</p>
+		</div>
+		<div class="mdaServiceHeader">
+			<a href="https://bioinformatics.mdanderson.org/public-software/tcga-batch-effects/" target="_blank" style="float: left;"><img class="mdaServiceHeaderLogo" src="mdandersonlogo300x54.png" alt="MDA Logo"></a>
+			<span class="mdaServiceHeaderTitle">
+				MDA Standardized Data Metabolomics Workbench Tool
+				<small>2019-11-19-1010</small>
+				<!-- span class="mdaServiceHeaderTitle" style="margin: 0; padding: 0;" data-bind="text:$root.serverTitle()"></span -->
+				<small style="float: right;">
+					<a href="https://github.com/MD-Anderson-Bioinformatics/BatchEffectsInterfaceStack/tree/master/docs" target="_blank">Help</a>
+					/
+					<a href="https://github.com/MD-Anderson-Bioinformatics/BatchEffectsPackage/tree/master/apps" target="_blank">GitHub</a>
+				</small>
+			</span>
+		</div>
+		<br>
+		<select style="width: 75%" data-bind="options: $root.listOfSummaries, optionsText: function(theItem) { return theItem.study_id + ' ' + theItem.study_title; }, value: $root.selectedSummary"></select><br>
+		<div data-bind="with: appview.selectedSummary(), as: 'selStudy'">
+			<table>
+				<tbody data-bind="foreach: { data: appview.selectedSummaryKeys(), as: 'selKey' }">
+					<tr>
+						<td style="font-weight:bold" data-bind="text: selKey"></td>
+						<td data-bind="text: selStudy[selKey]"></td>
+					</tr>
+				</tbody>
+			</table>
+			<button data-bind="click: appview.downloadBatches">Download Batches TSV</button>
+			<button data-bind="click: appview.loadAnalyses">Load Analyses</button>
+			<!-- ko if: appview.analysesKeys().length > 0 -->
+			<div class="rTable">
+				<!-- ko foreach: { data: appview.analysesKeys(), as: "anlysKey" } -->
+				<div class="rTableRow">
+					<div class="rTableHead" data-bind="text: anlysKey"></div>
+					<!-- ko foreach: { data: appview.listOfAnalyses, as: "myAnlys" } -->
+					<div class="rTableHead" data-bind="text: myAnlys[anlysKey]"></div>
+					<!-- /ko -->
+				</div>
+				<!-- /ko -->
+				<div class="rTableRow">
+					<div class="rTableHead">Download Data</div>
+					<!-- ko foreach: { data: appview.listOfAnalyses, as: "myAnlys" } -->
+					<div class="rTableHead">
+						<button data-bind="click: appview.downloadAnalysisDataDC">Download Drop Class</button>
+						<button data-bind="click: appview.downloadAnalysisDataMSC">Download Merge Sample-Class</button>
+						<button data-bind="click: appview.downloadAnalysisDataRaw">Download Raw</button>
+					</div>
+					<!-- /ko -->
+				</div>
+			</div>
+			<!-- /ko -->
+		</div>
+	</body>
+</html>

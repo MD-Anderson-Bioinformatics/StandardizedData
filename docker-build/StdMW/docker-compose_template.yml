@@ -1,0 +1,36 @@
+# this is the docker-compose version
+version: '3.0'
+
+# file version 2018-11-20-1616
+
+networks:
+    # network for this compose stack
+    stdmw_network_<ENVIRON>:
+        driver: bridge
+        ipam:
+            config:
+            - subnet: <SUBNET>
+services:
+    stdmw_service:
+        networks:
+            - stdmw_network_<ENVIRON>
+        # restart this container if it crashes
+        restart: always
+        build:
+            # build from directory in context and Dockerfile
+            context: .
+            dockerfile: Dockerfile
+        container_name: stdmw_cont_<ENVIRON>
+        # update :latest to desired version
+        image: <IMAGETXT>:<DESIREDTAG>
+        volumes:
+            # outside access for data files outside:inside
+            - <LOGPATH>:/opt/tomcat/logs
+            # read-only file to set time and timezone to same in image as on server
+            - /etc/localtime:/etc/localtime:ro
+            - /etc/localtime:/etc/timezone:ro
+        ports:
+            # (outside)host port:container port(inside) for Tomcat
+            # outside/host port is only set here (other docker compose have ports in more than one place)
+            - "<OUTSIDE_PORT>:8080"
+        tty: true

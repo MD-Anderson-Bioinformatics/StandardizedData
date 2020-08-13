@@ -1,0 +1,6 @@
+
+This describes Ensembl's release archives. http://useast.ensembl.org/Help/Faq?id=286;redirect=no
+
+The HG18 (GRCh36) release is located at ftp://ftp.ensembl.org/pub/release-54/gtf/homo_sapiens/
+The HG19 (GRCh37) release is located at ftp://ftp.ensembl.org/pub/release-75/gtf/homo_sapiens/
+The HG38 (GRCh38) release is located at ftp://ftp.ensembl.org/pub/release-85/gtf/homo_sapiens/
