@@ -11,10 +11,10 @@
 
 package edu.mda.bioinfo.stdmw.servlets;
 
-import edu.mda.bioinfo.stdmw.data.MWUrls;
-import edu.mda.bioinfo.stdmw.data.Summary;
-import edu.mda.bioinfo.stdmw.utils.FactorUtil;
-import edu.mda.bioinfo.stdmw.utils.SummaryUtil;
+import edu.mda.bioinfo.stdmwutils.mwdata.MWUrls;
+import edu.mda.bioinfo.stdmwutils.mwdata.Summary;
+import edu.mda.bioinfo.stdmwutils.utils.FactorUtil;
+import edu.mda.bioinfo.stdmwutils.utils.SummaryUtil;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.servlet.ServletException;
@@ -51,14 +51,15 @@ public class Factors extends HttpServlet
 			log("Servlet Factors " + MWUrls.M_VERSION);
 			SummaryUtil summaryUtil = (SummaryUtil)(this.getServletContext().getAttribute("SUMMARIES"));
 			String hash = request.getParameter("hash");
-			Summary summary = summaryUtil.getSummary(hash);
+			log("Servlet Factors hash = " + hash);
+			Summary summary = summaryUtil.get(hash);
 			if (null!=summary)
 			{
 				response.setContentType("text/tab-separated-values;charset=UTF-8");
 				response.setHeader("Content-Disposition", "attachment; filename=\"" + summary.study_id + "_batches.tsv\"");
 				try (OutputStream out = response.getOutputStream())
 				{
-					FactorUtil.getBatchesTSV(out, this.getServletContext(), request.getSession(), summary.study_id);
+					FactorUtil.getBatchesTSV(out, summary.study_id);
 				}
 			}
 			else

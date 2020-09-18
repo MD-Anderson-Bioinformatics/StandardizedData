@@ -129,7 +129,7 @@ public class GDCStack
 			postStatus(theUrlBase, theJobId, theInProcessStatus);
 			GDCAPI.printLn("main start");
 			// process download and convert
-			File convertDir = SingleDataset.processDirectory(theBaseDir, theJobId);
+			File convertDir = PanCanUpdate.processDirectory(theBaseDir, theJobId);
 			// copy matrix and batch files
 			GDCAPI.printLn("copy mutations, matrix and batch files");
 			File mutation = new File(convertDir, "mutations.tsv");

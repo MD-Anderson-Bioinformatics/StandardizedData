@@ -53,20 +53,6 @@ public class SingleDataset
 			GDCAPI.printErr("Error in main", theExp);
 		}
 	}
-
-	public static void main(String[] args)
-	{
-		String baseDir = args[0];
-		String jobid = args[1];
-		// download manifest for Program theProgram, Project theProject, DataType theDataType, Workflow theWorkflow combination
-		try
-		{
-		}
-		catch(Exception exp)
-		{
-			GDCAPI.printErr("Error in main", exp);
-		}
-	};
 	
 	public static File processDirectory(File theBaseDir, String theJobId) throws IOException, Exception
 	{

@@ -8,11 +8,14 @@
 //
 // MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 // MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
-
 package edu.mda.bioinfo.stdmw.startup;
 
-import edu.mda.bioinfo.stdmw.data.MWUrls;
-import edu.mda.bioinfo.stdmw.utils.SummaryUtil;
+import edu.mda.bioinfo.stdmwutils.mwdata.MWUrls;
+import edu.mda.bioinfo.stdmwutils.utils.AnalysisUtil;
+import edu.mda.bioinfo.stdmwutils.utils.MetaboliteUtil;
+import edu.mda.bioinfo.stdmwutils.utils.SummaryUtil;
+import edu.mda.bioinfo.stdmwutils.utils.RefMetUtil;
+import edu.mda.bioinfo.stdmwutils.utils.OtherIdsUtil;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -24,23 +27,30 @@ import javax.servlet.annotation.WebListener;
 @WebListener
 public class Load implements ServletContextListener
 {
-	public SummaryUtil mLoad = null;
-	
+
 	@Override
 	public void contextInitialized(ServletContextEvent sce)
 	{
 		ServletContextListener.super.contextInitialized(sce);
 		try
 		{
-			sce.getServletContext().log("Load contextInitialized " +MWUrls.M_VERSION);
-			mLoad = new SummaryUtil();
-			mLoad.loadSummaries(sce.getServletContext());
-			sce.getServletContext().setAttribute("SUMMARIES", mLoad);
+			// TODO: reload this on a timer
+			sce.getServletContext().log("Load contextInitialized " + MWUrls.M_VERSION);
+			SummaryUtil summary = SummaryUtil.readNewestSummaryFile();
+			sce.getServletContext().setAttribute("SUMMARIES", summary);
+			AnalysisUtil analysis = AnalysisUtil.readNewestAnalysisFile();
+			sce.getServletContext().setAttribute("ANALYSES", analysis);
+			MetaboliteUtil metaUtil = MetaboliteUtil.readNewestMetaboliteFile();
+			sce.getServletContext().setAttribute("METABOLITE", metaUtil);
+			RefMetUtil refmetUtil = RefMetUtil.readNewestRefMetFile();
+			sce.getServletContext().setAttribute("REFMET", refmetUtil);
+			OtherIdsUtil ortherIdsUtil = OtherIdsUtil.readNewestOtherIdsFile();
+			sce.getServletContext().setAttribute("OTHERIDS", ortherIdsUtil);
 		}
-		catch(Exception exp)
+		catch (Exception exp)
 		{
 			sce.getServletContext().log("Error during Load startup", exp);
 		}
-		
+
 	}
 }

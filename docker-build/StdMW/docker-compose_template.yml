@@ -25,6 +25,7 @@ services:
         image: <IMAGETXT>:<DESIREDTAG>
         volumes:
             # outside access for data files outside:inside
+            - <CONFIGPATH>:/SMW/MW_CACHE:ro
             - <LOGPATH>:/opt/tomcat/logs
             # read-only file to set time and timezone to same in image as on server
             - /etc/localtime:/etc/localtime:ro

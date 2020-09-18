@@ -11,10 +11,10 @@
 
 package edu.mda.bioinfo.stdmw.servlets;
 
-import edu.mda.bioinfo.stdmw.data.Analysis;
-import edu.mda.bioinfo.stdmw.data.MWUrls;
-import edu.mda.bioinfo.stdmw.utils.AnalysisUtil;
-import edu.mda.bioinfo.stdmw.utils.DatatableUtil;
+import edu.mda.bioinfo.stdmwutils.mwdata.Analysis;
+import edu.mda.bioinfo.stdmwutils.mwdata.MWUrls;
+import edu.mda.bioinfo.stdmwutils.utils.AnalysisUtil;
+import edu.mda.bioinfo.stdmwutils.utils.DatatableUtil;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.servlet.ServletException;
@@ -49,8 +49,10 @@ public class AnalysisDataDC extends HttpServlet
 		try
 		{
 			log("Servlet AnalysisDataDC " + MWUrls.M_VERSION);
+			String study_hash = request.getParameter("study_hash");
 			String hash = request.getParameter("hash");
-			Analysis analysis = AnalysisUtil.getAnalysis(this.getServletContext(), request.getSession(), hash);
+			AnalysisUtil analysisUtil = (AnalysisUtil)(this.getServletContext().getAttribute("ANALYSES"));
+			Analysis analysis = analysisUtil.getAnalysis(study_hash, hash);
 			if (null!=analysis)
 			{
 				response.setContentType("text/tab-separated-values;charset=UTF-8");

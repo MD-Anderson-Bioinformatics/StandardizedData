@@ -18,7 +18,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -213,7 +212,7 @@ public class GDCAPI
 
 	static public String getVersion()
 	{
-		return "GDCAPI 2020-07-20-1100";
+		return "GDCAPI 2020-09-11-1000";
 	}
 
 	static public File findNewestTSV(File theDir)

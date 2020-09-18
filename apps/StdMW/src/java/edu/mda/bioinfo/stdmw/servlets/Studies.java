@@ -11,11 +11,9 @@
 
 package edu.mda.bioinfo.stdmw.servlets;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import edu.mda.bioinfo.stdmw.data.MWUrls;
-import edu.mda.bioinfo.stdmw.data.Summary;
-import edu.mda.bioinfo.stdmw.utils.SummaryUtil;
+import edu.mda.bioinfo.stdmwutils.mwdata.MWUrls;
+import edu.mda.bioinfo.stdmwutils.mwdata.Summary;
+import edu.mda.bioinfo.stdmwutils.utils.SummaryUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.TreeSet;
@@ -52,14 +50,10 @@ public class Studies extends HttpServlet
 		{
 			log("Servlet Studies " + MWUrls.M_VERSION);
 			SummaryUtil summaryUtil = (SummaryUtil)(this.getServletContext().getAttribute("SUMMARIES"));
-			TreeSet<Summary> summarySet = new TreeSet<>(summaryUtil.getMap(this.getServletContext()).values());
 			response.setContentType("application/json;charset=UTF-8");
 			try (PrintWriter out = response.getWriter())
 			{
-				GsonBuilder builder = new GsonBuilder();
-				builder.setPrettyPrinting();
-				Gson gson = builder.create();
-				out.print(gson.toJson(summarySet));
+				out.print(summaryUtil.getAsJson());
 			}
 			log("Servlet Studies returning");
 		}

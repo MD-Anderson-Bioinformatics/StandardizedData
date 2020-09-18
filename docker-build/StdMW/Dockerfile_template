@@ -48,7 +48,15 @@ COPY installations/StdMW.war ${CATALINA_HOME}/webapps/.
 RUN chown -R docker_tcga:docker_tcga ${CATALINA_HOME}/webapps && \
     chmod -R u+rwx ${CATALINA_HOME}/webapps
 
+# create dirs for config- will be volume mount point
+RUN mkdir -p /SMW/MW_CACHE && \
+    chown -R docker_tcga:docker_tcga /SMW && \
+    chmod -R u+rwx /SMW
+
 # switch from root to docker_tcga user
 USER docker_tcga
+
+# declare internal volumes
+VOLUME /SMW/MW_CACHE
 
 CMD ["/opt/tomcat/bin/catalina.sh", "run"]

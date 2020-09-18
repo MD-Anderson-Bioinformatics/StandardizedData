@@ -90,4 +90,17 @@ public class Dataframe
 		GDCAPI.printWarn("'" + theMatchColumn + "' not found for '" + theMatchValue + "'");
 		return new ArrayList<String>();
 	}
+	
+	public ArrayList<String> getRowFromColumnValueNoWarn(String theMatchColumn, String theMatchValue)
+	{
+		int indexMatch = mHeaders.indexOf(theMatchColumn);
+		for (ArrayList<String> data : mData)
+		{
+			if (theMatchValue.equals(data.get(indexMatch)))
+			{
+				return data;
+			}
+		}
+		return new ArrayList<String>();
+	}
 }

@@ -50,7 +50,7 @@ public class DevData
 			String project = "TCGA-ACC";
 			String dataType = "Masked Somatic Mutation";
 			String workflow = "MuTect2 Variant Aggregation and Masking";
-			SingleDataset.downloadDataset(new File(M_BASE_DIR), program, project, dataType, workflow, "JOBID");
+			PanCanUpdate.downloadDataset(new File(M_BASE_DIR), program, project, dataType, workflow, "JOBID");
 			//SingleDataset.downloadDataset(new File(M_BASE_DIR), program, project, dataType, workflow, jobid);
 		}
 		catch(Exception exp)

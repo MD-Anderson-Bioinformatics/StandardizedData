@@ -1,4 +1,4 @@
-*{ font-family: Arial,sans-serif;  font-size: 14px;}
+*{ font-family: Arial,sans-serif;}
 
 body
 {
@@ -9,6 +9,74 @@ body.wait, body.wait *
 {
         cursor: wait !important;
 }
+
+/* ******************** */
+/* **** Header Row **** */
+/* ******************** */
+
+.div-header
+{
+	grid-column: 1 / span 5;
+	grid-row: 1;
+	background-color: white;
+}
+
+/* wrapper for MDA header */
+.stdmwServiceHeader
+{
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	background-image: url('images/banner.png');
+	height: var(--header-height);
+}
+
+.stdmwServiceHeaderLogo
+{
+	margin: auto;
+}
+
+/* internal wrapper for middle expanding title area in MDA header */
+.stdmwServiceHeaderTitle
+{
+	flex: 1;
+	color: #403333;
+}
+
+.stdmwTitleText
+{
+	display: inline-block;
+	font-weight: bold;
+	font-size: 14pt;
+	padding-top: 10px;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+.stdmwHeaderLinks
+{
+	vertical-align: top;
+	text-align: right;
+	font-weight: normal;
+}
+
+/* *************************** */
+/* Popup DataTablebutton CSS               */
+/* *************************** */
+
+td.details-control
+{
+	background: url('images/details_open.png') no-repeat center center;
+	cursor: pointer;
+}
+tr.shown td.details-control
+{
+	background: url('images/details_close.png') no-repeat center center;
+}
+
+/* *************************** */
+/* MDA Table CSS               */
+/* *************************** */
 
 table.mdaCollapsedTable
 {
@@ -82,7 +150,7 @@ input
 {
 	z-index: -1;
 	overflow: hidden;
-	background-image: url('banner.png');
+	background-image: url('images/banner.png');
 }
 
 .mdaServiceHeaderLogo
@@ -111,20 +179,23 @@ input
  .buttons
  {
 	border: none;
-	border-radius: 5px;
-	padding: 3px 9px;
+	border-radius: 2px;
+	padding: 2px 2px;
 	color: #ffffff;
-	font: normal 500 16px/1 "Calibri", sans-serif;
 	text-align: center;
 	text-shadow: 1px 1px #000000;
-	font-size: 18px;
-	margin: 2px;
+	margin: 1px;
 	display: inline-block;
 	text-decoration: none;
 	background: #3d85c6;
 	background: -webkit-linear-gradient(#3d85c6, #073763);
 	background: linear-gradient(#3d85c6, #073763);
 	white-space: nowrap;
+}
+
+.mdaSmallText
+{
+	font-size: x-small !important;
 }
 
 .right-buttons

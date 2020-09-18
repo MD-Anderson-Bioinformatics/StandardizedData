@@ -76,7 +76,7 @@ public class WorkflowsLegacy extends Endpoint_Mixin
 			if ("tags".equals(attribute))
 			{
 				JsonArray tagsArray = theObj.get(attribute).getAsJsonArray();
-				TreeSet<String> tagSet = new TreeSet();
+				TreeSet<String> tagSet = new TreeSet<>();
 				for (JsonElement ele : tagsArray)
 				{
 					tagSet.add(ele.getAsString());
