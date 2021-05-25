@@ -1,7 +1,17 @@
 #!/bin/bash
 
-echo "run local PlatformReleaseMaps"
-cd ../apps/PlatformReleaseMaps
-java -Xmx8G -Xms8G -Djava.awt.headless=true -classpath "./dist/PlatformReleaseMaps.jar" edu.mda.bcb.prm.PlatformReleaseMaps
+echo "START 02_runRPM"
 
-echo "done"
+set -e
+
+STD_DIR=$1
+
+set -e
+
+echo "run local PlatformReleaseMaps"
+cd ${STD_DIR}/apps/PlatformReleaseMaps
+java -Xmx8G -Xms8G -Djava.awt.headless=true -classpath "${STD_DIR}/apps/PlatformReleaseMaps/target/*" edu.mda.bcb.prm.PlatformReleaseMaps
+
+echo "START 02_runRPM"
+
+

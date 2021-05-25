@@ -1,30 +1,39 @@
 #!/bin/bash
 
-./00_clear.bash
+echo "START 01_compile"
 
-echo "move to app dir"
-cd ../apps
+set -e
+
+STD_DIR=$1
+
+echo "compile SamplesValidation"
+cd ${STD_DIR}/apps/SamplesValidation
+mvn clean install dependency:copy-dependencies
 
 echo "compile PlatformReleaseMaps"
-cd PlatformReleaseMaps
-ant clean jar
-cd ..
+cd ${STD_DIR}/apps/PlatformReleaseMaps
+mvn clean install dependency:copy-dependencies
 
 echo "compile GDCAPI"
-cd GDCAPI
-ant clean jar
-cd ..
+cd ${STD_DIR}/apps/GDCAPI
+mvn clean install dependency:copy-dependencies
+
+echo "compile StdMWUtils"
+cd ${STD_DIR}/apps/StdMWUtils
+mvn -e clean install dependency:copy-dependencies
 
 echo "compile StdMW"
-cd StdMW
-ant -f build.xml
-cd ..
+cd ${STD_DIR}/apps/StdMW
+mvn clean install dependency:copy-dependencies
 
-echo "list ./PlatformReleaseMaps/dist"
-ls -l ./PlatformReleaseMaps/dist
-echo "list ./GDCAPI/dist"
-ls -l ./GDCAPI/dist
-echo "list ./StdMW/dist"
-ls -l ./StdMW/dist
+echo "list PlatformReleaseMaps/target/*.jar"
+ls -lh ${STD_DIR}/apps/PlatformReleaseMaps/target/*.jar
+echo "list GDCAPI/target/*.jar"
+ls -lh ${STD_DIR}/apps/GDCAPI/target/*.jar
+echo "list StdMWUtils/target/*.jar"
+ls -lh ${STD_DIR}/apps/StdMWUtils/target/*.jar
+echo "list StdMW/target/*.war"
+ls -lh ${STD_DIR}/apps/StdMW/target/*.war
 
-echo "done"
+echo "FINISH 01_compile"
+
