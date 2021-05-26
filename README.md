@@ -31,7 +31,7 @@ R packages are RStudio projects.
 |StdMWUtils (app)|Library for downloading and converting Metabolomics Workbench data|
 |StdMW (docker)|Docker Image for StdMW|
 
-# Installation and running Docker Image
+# Standardized Metabolomics Workbench Tool Docker Quick Start
 
 Download the docker-compose.yml file at the root of this repository. This file is setup for use on Linux.
 
