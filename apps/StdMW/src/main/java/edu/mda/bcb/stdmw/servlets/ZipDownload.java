@@ -16,6 +16,8 @@ import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -48,11 +50,16 @@ public class ZipDownload extends HttpServlet
 		try
 		{
 			log("Servlet ZipDownload " + MWUrls.M_VERSION);
-			String loc = request.getParameter("loc");
-			if (null!=loc)
+			String analysis_hash = request.getParameter("analysis_hash");
+			String study_hash = request.getParameter("study_hash");
+			if ((null!=analysis_hash)&&(null!=study_hash))
 			{
 				File dataDir = new File(MWUrls.M_MW_ZIPTMP);
-				File zipFile = new File(dataDir, loc);
+				checkPathExistsSafely(dataDir, study_hash);
+				File subDir = new File(dataDir, study_hash);
+				checkPathExistsSafely(subDir, analysis_hash);
+				File lastDir = new File(subDir, analysis_hash);
+				File zipFile = new File(lastDir, (analysis_hash + ".zip"));
 				if (zipFile.exists())
 				{
 					response.setContentType("application/zip;charset=UTF-8");
@@ -75,10 +82,21 @@ public class ZipDownload extends HttpServlet
 			}
 			log("Servlet ZipDownload returning");
 		}
-		catch(Exception exp)
+		catch (Exception exp)
 		{
-			log("Error getting analysis data from MetabolomicsWorkbench", exp);
-			throw new ServletException("Error getting analysis data from MetabolomicsWorkbench", exp);
+			log("ZipDownload", exp);
+			response.setStatus(400);
+			response.sendError(400);
+		}
+	}
+	
+	protected void checkPathExistsSafely(File theDir, String theCheckDir) throws Exception
+	{
+		String [] dirs = theDir.list();
+		ArrayList<String> dirList = new ArrayList<>(Arrays.asList(dirs));
+		if (!dirList.contains(theCheckDir))
+		{
+			throw new Exception("Dir not found:" + theCheckDir);
 		}
 	}
 

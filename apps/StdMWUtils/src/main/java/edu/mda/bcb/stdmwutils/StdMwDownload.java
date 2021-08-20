@@ -48,11 +48,11 @@ public class StdMwDownload
 			StdMwDownload.printLn("StdMwDownload Starting");
 			StdMwDownload.printLn(getVersion());
 			// use normal download for normal runs (check this one in)
-			//TDC StdMwDownload.printLn("normalCacheDownload");
-			//TDC normalCacheDownload();
+			StdMwDownload.printLn("normalCacheDownload");
+			normalCacheDownload();
 			// use test read for new development
-			//TDC StdMwDownload.printLn("testCacheRead");
-			//TDC testCacheRead(true);
+			StdMwDownload.printLn("testCacheRead");
+			testCacheRead(true);
 			// process analysis data for pipeline
 			M_QUERY_INDEX = new DataIndex(new File(new File(MWUrls.M_MW_PIPELINE, "INDEX"), "index.tsv"));
 			processCacheForPipeline();
@@ -115,7 +115,7 @@ public class StdMwDownload
 		File timestampDir = MWUrls.findNewestDir(new File(MWUrls.M_MW_CACHE));
 		//
 		MWAPI sp = new MWAPI(su, au, mu, ru, ou, timestampDir);
-		sp.processPipeline(5, timestampDir.getName());
+		sp.processPipeline(2000, timestampDir.getName());
 	}
 
 	static public String getTimestamp()

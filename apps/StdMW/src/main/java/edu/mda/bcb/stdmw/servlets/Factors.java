@@ -68,10 +68,11 @@ public class Factors extends HttpServlet
 			}
 			log("Servlet Factors returning");
 		}
-		catch(Exception exp)
+		catch (Exception exp)
 		{
-			log("Error getting list of factors from MetabolomicsWorkbench", exp);
-			throw new ServletException("Error getting list of factors from MetabolomicsWorkbench", exp);
+			log("Factors", exp);
+			response.setStatus(400);
+			response.sendError(400);
 		}
 	}
 

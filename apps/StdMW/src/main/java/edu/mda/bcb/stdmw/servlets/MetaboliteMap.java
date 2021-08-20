@@ -83,8 +83,9 @@ public class MetaboliteMap extends HttpServlet
 		}
 		catch (Exception exp)
 		{
-			log("Error getting MetaboliteMap from MetabolomicsWorkbench", exp);
-			throw new ServletException("Error getting MetaboliteMap from MetabolomicsWorkbench", exp);
+			log("MetaboliteMap", exp);
+			response.setStatus(400);
+			response.sendError(400);
 		}
 	}
 

@@ -72,10 +72,11 @@ public class AnalysisDataDC extends HttpServlet
 			}
 			log("Servlet AnalysisDataDC returning");
 		}
-		catch(Exception exp)
+		catch (Exception exp)
 		{
-			log("Error getting analysis data from MetabolomicsWorkbench", exp);
-			throw new ServletException("Error getting analysis data from MetabolomicsWorkbench", exp);
+			log("AnalysisDataDC", exp);
+			response.setStatus(400);
+			response.sendError(400);
 		}
 	}
 

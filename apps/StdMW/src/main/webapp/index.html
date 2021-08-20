@@ -5,14 +5,14 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-		<link href="lib/DataTables/DataTables-1.10.20/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css">
-		<link href="lib/jquery-ui-1.12.1/jquery-ui.min.css" rel="stylesheet" type="text/css">
-		<link href="StdMW.css" rel="stylesheet" type="text/css">
+		<link href="lib/DataTables/DataTables-1.10.20/css/jquery.dataTables.min.css?v=BEA_VERSION_TIMESTAMP" rel="stylesheet" type="text/css">
+		<link href="lib/jquery-ui-1.12.1/jquery-ui.min.css?v=BEA_VERSION_TIMESTAMP" rel="stylesheet" type="text/css">
+		<link href="StdMW.css?v=BEA_VERSION_TIMESTAMP" rel="stylesheet" type="text/css">
 
-		<script src="lib/knockout-3.5.1.js" type="text/javascript" charset="utf-8"></script>
-		<script src="lib/jquery-3.5.0.min.js" type="text/javascript" charset="utf-8"></script>
-		<script src="lib/jquery-ui-1.12.1/jquery-ui.min.js" type="text/javascript" charset="utf-8"></script>
-		<script src="lib/DataTables/DataTables-1.10.20/js/jquery.dataTables.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="lib/knockout-3.5.1.js?v=BEA_VERSION_TIMESTAMP" type="text/javascript" charset="utf-8"></script>
+		<script src="lib/jquery-3.5.0.min.js?v=BEA_VERSION_TIMESTAMP" type="text/javascript" charset="utf-8"></script>
+		<script src="lib/jquery-ui-1.12.1/jquery-ui.min.js?v=BEA_VERSION_TIMESTAMP" type="text/javascript" charset="utf-8"></script>
+		<script src="lib/DataTables/DataTables-1.10.20/js/jquery.dataTables.min.js?v=BEA_VERSION_TIMESTAMP" type="text/javascript" charset="utf-8"></script>
 
 		<script type="text/javascript">
 			/* global ko */
@@ -65,7 +65,7 @@
 							success: function (theString)
 							{
 								console.log("zipc :" + theString);
-								window.location.href = 'zipdl?loc=' + theString;
+								window.location.href = 'zipdl?analysis_hash=' + theAnalysisHash + '&study_hash=' + theStudyHash;
 							},
 							error: function (jqXHR, textStatus, errorThrown)
 							{
@@ -291,7 +291,7 @@
 	</head>
 	<body style="display: none;" data-bind="visible: $root.makeGuiVisible()">
 		<div id='alrt'>
-			<p onclick="document.getElementById('alrt').style.display = 'none';"><small>Legal notice: Unauthorized access to the network is prohibited. This system is for the use of authorized users only. 
+			<p onclick="document.getElementById('alrt').style.display = 'none';"><small>Privacy Notice - Legal notice: Unauthorized access to the network is prohibited. This system is for the use of authorized users only. 
 					Individuals using this computer system without authority, or in excess of their authority, are subject to having all of 
 					their activities on this system monitored and recorded by system personnel. In the course of monitoring individuals 
 					improperly using this system, or in the course of system maintenance, the activities of authorized users may also be 
@@ -324,7 +324,7 @@
 					<a href="https://bioinformatics.mdanderson.org/main/TCGABatchEffects:Overview" target="_blank"><small>Batch Effects Overview</small><br></a>
 					<strong>Documentation</strong><br>
 					<a href="https://bioinformatics.mdanderson.org/public-software/tcga-batch-effects/" target="_blank"><small>MBatch R Package</small></a><br>
-					<a href="" onclick="document.getElementById('alrt').style.display = 'block'; return false;"><small>Legal Notice</small></a><br>
+					<a href="" onclick="document.getElementById('alrt').style.display = 'block'; return false;"><small>Legal - Privacy Notice</small></a><br>
 					<a href="https://github.com/MD-Anderson-Bioinformatics/" target="_blank"><small>GitHub</small></a><br>
 					<strong>About</strong><br>
 					<a href="https://bioinformatics.mdanderson.org" target="_blank"><small>About BCB at MD Anderson</small></a><br>

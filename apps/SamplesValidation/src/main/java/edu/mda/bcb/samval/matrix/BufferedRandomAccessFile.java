@@ -207,7 +207,8 @@ public class BufferedRandomAccessFile extends RandomAccessFile
 			}
 			return input.toString();
 		}
-		line = new String(this.buffer, 0, this.bufferPosition, lineEnd - this.bufferPosition);
+		//line = new String(this.buffer, 0, this.bufferPosition, lineEnd - this.bufferPosition);
+		line = new String(this.buffer, this.bufferPosition, lineEnd - this.bufferPosition);
 		this.bufferPosition = lineEnd;
 		return line;
 	}

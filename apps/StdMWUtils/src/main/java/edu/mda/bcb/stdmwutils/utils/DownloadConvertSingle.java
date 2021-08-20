@@ -34,12 +34,13 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import org.apache.commons.io.FileUtils;
 
 /**
  *
- * @author tod-casasent
+ * @author Tod-Casasent
  */
 public class DownloadConvertSingle
 {
@@ -60,8 +61,9 @@ public class DownloadConvertSingle
 	
 	public String downloadLocation()
 	{
-		String loc = mAnalysis.study_hash + "/" + mAnalysis.hash + "/" + mAnalysis.hash + ".zip";
-		return loc;
+		// Do not use path, since it is exposed in the web aoo
+		//String loc = mAnalysis.study_hash + "/" + mAnalysis.hash + "/" + mAnalysis.hash + ".zip";
+		return mAnalysis.hash;
 	}
 	
 	public String dAndC() throws IOException, NoSuchAlgorithmException, MalformedURLException, StdMwException, Exception
@@ -351,15 +353,32 @@ public class DownloadConvertSingle
 						headerToIndex.put(headerCol, headers.indexOf(headerCol));
 					}
 				}
+				// track processed feature names
+				TreeMap<String, Integer> featureToCount = new TreeMap<>();
 				// first summary line
 				line = br.readLine();
 				while(null!=line)
 				{
 					String [] splitted = line.split("\t", -1);
 					// feature
-					bw.write(splitted[headerToIndex.get(metaboliteIdCol)]);
+					String featureRowLabel = splitted[headerToIndex.get(metaboliteIdCol)];
+					Integer count = featureToCount.get(featureRowLabel);
+					if (null==count)
+					{
+						count = 0;
+					}
+					else
+					{
+						count = count + 1;
+					}
+					featureToCount.put(featureRowLabel, count);
+					if (count>0)
+					{
+						featureRowLabel = featureRowLabel + "_" + count;
+					}
+					bw.write(featureRowLabel);
 					bw.write("\t");
-					bw.write(splitted[headerToIndex.get(metaboliteIdCol)]);
+					bw.write(featureRowLabel);
 					for (String headerCol : headerOrder)
 					{
 						bw.write("|");
@@ -409,11 +428,12 @@ public class DownloadConvertSingle
 				dropUrl.delete();
 			}
 		}
-		File batchFile = new File(dldDir, "batch_factors.tsv");
-		if (batchFile.exists())
-		{
-			batchFile.delete();
-		}
+		// Do not delete -- keep in case we want some of these other factors
+		//File batchFile = new File(dldDir, "batch_factors.tsv");
+		//if (batchFile.exists())
+		//{
+		//	batchFile.delete();
+		//}
 		// zip directory
 		File zipFile = new File(dldDir, (mAnalysis.hash + ".zip"));
 		File [] files = ZipData.zip(dldDir, zipFile);

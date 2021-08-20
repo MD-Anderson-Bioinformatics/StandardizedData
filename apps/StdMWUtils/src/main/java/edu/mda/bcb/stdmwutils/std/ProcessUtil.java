@@ -173,19 +173,21 @@ public class ProcessUtil
 		}
 	}
 	
-	protected void convertBatchOptions(File theOldBatch, File theNewBatch, File theMatrixData,
+	protected int convertBatchOptions(File theOldBatch, File theNewBatch, File theMatrixData,
 			String theOriginalColumn, String theNewColumn) throws Exception
 	{
 		boolean noRectangleFlag = false;
 		Matrix batches = new Builder(theOldBatch.getAbsolutePath())
 				.allowNonRectangle(noRectangleFlag)
 				.build();
+		batches.removeNonBatches(theOriginalColumn);
 		Matrix matrix = new Builder(theMatrixData.getAbsolutePath()).build();
 		Matrix.filterMatrix(matrix, batches.getRowSet(), 1);
 		SamplesValidationUtil.createMissingBatchEntries(batches, matrix.getColumns());
 		batches.sortRows();
 		batches.sortColumns();
-		batches.write(theNewBatch.getAbsolutePath(), true, theOriginalColumn, theNewColumn);
+		int col = batches.write(theNewBatch.getAbsolutePath(), true, theOriginalColumn, theNewColumn);
+		return col;
 	}
 	
 	public File getZipDir(ProcessEntry thePe)
@@ -254,11 +256,15 @@ public class ProcessUtil
 				boolean wrote = false;
 				try
 				{
-					convertBatchOptions(batchFile, batchesFile, new File(dldDir, "matrix_data.tsv"), "Samples", "Sample");
-					wrote = true;
+					int cols = convertBatchOptions(batchFile, batchesFile, new File(dldDir, "matrix_data.tsv"), "Samples", "Sample");
+					if (cols>0)
+					{
+						wrote = true;
+					}
 				}
 				catch(Exception exp)
 				{
+					wrote = false;
 					StdMwDownload.printErr("Error converting batch data file for " + thePe.mAn.analysis_id + " -- " + thePe.mSu.study_id, exp);
 				}
 				if (true==wrote)
@@ -291,6 +297,7 @@ public class ProcessUtil
 				}
 				else
 				{
+					StdMwDownload.printLn("No usable batch types found");
 					// set convert failed
 					thePe.mStatus = M_STATUS_FAILED;
 				}
@@ -335,54 +342,67 @@ public class ProcessUtil
 		suDir.mkdir();
 		File dldDir = new File(suDir, thePe.mHash);
 		dldDir.mkdir();
-		// download all versions of data (Raw, Drop Class, Merge Sample-Class)
-		OpenOption[] options = new OpenOption[] { StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING };
-		File rawFile = new File(dldDir, "raw_data.tsv");
-		File rawUrl = new File(dldDir, "raw_url.tsv");
-		String rawGood = null;
-		try(OutputStream out = java.nio.file.Files.newOutputStream(rawFile.toPath(), options))
+		try
 		{
-			rawGood = DatatableUtil.getDatatableRaw(out, thePe.mAn.analysis_id);
+			// download all versions of data (Raw, Drop Class, Merge Sample-Class)
+			OpenOption[] options = new OpenOption[] { StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING };
+			File rawFile = new File(dldDir, "raw_data.tsv");
+			File rawUrl = new File(dldDir, "raw_url.tsv");
+			String rawGood = null;
+			try(OutputStream out = java.nio.file.Files.newOutputStream(rawFile.toPath(), options))
+			{
+				rawGood = DatatableUtil.getDatatableRaw(out, thePe.mAn.analysis_id);
+			}
+			finally
+			{
+				postDownload(rawGood, rawFile, rawUrl, theTimestamp, options);
+			}
+			File mergeFile = new File(dldDir, "merge_data.tsv");
+			File mergeUrl = new File(dldDir, "merge_url.tsv");
+			String mergeGood = null;
+			try(OutputStream out = java.nio.file.Files.newOutputStream(mergeFile.toPath(), options))
+			{
+				mergeGood = DatatableUtil.getDatatableMSC(out, thePe.mAn.analysis_id);
+			}
+			finally
+			{
+				postDownload(mergeGood, mergeFile, mergeUrl, theTimestamp, options);
+			}
+			File dropFile = new File(dldDir, "drop_data.tsv");
+			File dropUrl = new File(dldDir, "drop_url.tsv");
+			String dropGood = null;
+			try(OutputStream out = java.nio.file.Files.newOutputStream(dropFile.toPath(), options))
+			{
+				dropGood = DatatableUtil.getDatatableDC(out, thePe.mAn.analysis_id);
+			}
+			finally
+			{
+				postDownload(dropGood, dropFile, dropUrl, theTimestamp, options);
+			}
+			// get Batch/Factors and Metabolites
+			File batchFile = new File(dldDir, "batch_factors.tsv");
+			try(OutputStream out = java.nio.file.Files.newOutputStream(batchFile.toPath(), options))
+			{
+				FactorUtil.getBatchesTSV(out, thePe.mSu.study_id);
+			}
+			File metaFile = new File(dldDir, "metabolites.tsv");
+			try(OutputStream out = java.nio.file.Files.newOutputStream(metaFile.toPath(), options))
+			{
+				MetaboliteMapUtil mmu = new MetaboliteMapUtil(mMu, mRu, mOu);
+				mmu.streamTsv(out, thePe.mAn.analysis_id);
+			}
+			thePe.mStatus = M_STATUS_DOWNLOADED;
 		}
-		finally
+		catch(Exception exp)
 		{
-			postDownload(rawGood, rawFile, rawUrl, theTimestamp, options);
+			StdMwDownload.printErr("Error processing dataset", exp);
+			thePe.mStatus = M_STATUS_FAILED;
+			// clean up files
+			if (dldDir.exists())
+			{
+				dldDir.delete();
+			}
 		}
-		File mergeFile = new File(dldDir, "merge_data.tsv");
-		File mergeUrl = new File(dldDir, "merge_url.tsv");
-		String mergeGood = null;
-		try(OutputStream out = java.nio.file.Files.newOutputStream(mergeFile.toPath(), options))
-		{
-			mergeGood = DatatableUtil.getDatatableMSC(out, thePe.mAn.analysis_id);
-		}
-		finally
-		{
-			postDownload(mergeGood, mergeFile, mergeUrl, theTimestamp, options);
-		}
-		File dropFile = new File(dldDir, "drop_data.tsv");
-		File dropUrl = new File(dldDir, "drop_url.tsv");
-		String dropGood = null;
-		try(OutputStream out = java.nio.file.Files.newOutputStream(dropFile.toPath(), options))
-		{
-			dropGood = DatatableUtil.getDatatableDC(out, thePe.mAn.analysis_id);
-		}
-		finally
-		{
-			postDownload(dropGood, dropFile, dropUrl, theTimestamp, options);
-		}
-		// get Batch/Factors and Metabolites
-		File batchFile = new File(dldDir, "batch_factors.tsv");
-		try(OutputStream out = java.nio.file.Files.newOutputStream(batchFile.toPath(), options))
-		{
-			FactorUtil.getBatchesTSV(out, thePe.mSu.study_id);
-		}
-		File metaFile = new File(dldDir, "metabolites.tsv");
-		try(OutputStream out = java.nio.file.Files.newOutputStream(metaFile.toPath(), options))
-		{
-			MetaboliteMapUtil mmu = new MetaboliteMapUtil(mMu, mRu, mOu);
-			mmu.streamTsv(out, thePe.mAn.analysis_id);
-		}
-		thePe.mStatus = M_STATUS_DOWNLOADED;
 	}
 	
 	public void cleanupDataOptions(ProcessEntry thePe) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
@@ -422,11 +442,12 @@ public class ProcessUtil
 				dropUrl.delete();
 			}
 		}
-		File batchFile = new File(dldDir, "batch_factors.tsv");
-		if (batchFile.exists())
-		{
-			batchFile.delete();
-		}
+		// Do not delete -- keep in case we want some of these other factors
+		//File batchFile = new File(dldDir, "batch_factors.tsv");
+		//if (batchFile.exists())
+		//{
+		//	batchFile.delete();
+		//}
 		// json index "index.json"
 		File jsonindexFile = new File(dldDir, "index.json");
 		JsonDataset jd = thePe.getJsonDataset(true);

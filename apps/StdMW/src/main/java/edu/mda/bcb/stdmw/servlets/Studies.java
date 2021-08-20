@@ -55,10 +55,11 @@ public class Studies extends HttpServlet
 			}
 			log("Servlet Studies returning");
 		}
-		catch(Exception exp)
+		catch (Exception exp)
 		{
-			log("Error getting list of summaries from MetabolomicsWorkbench", exp);
-			throw new ServletException("Error getting list of summaries from MetabolomicsWorkbench", exp);
+			log("Studies", exp);
+			response.setStatus(400);
+			response.sendError(400);
 		}
 	}
 

@@ -11,6 +11,7 @@
 
 package edu.mda.bcb.stdmwutils.mwdata;
 
+import edu.mda.bcb.stdmwutils.StdMwDownload;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -19,6 +20,23 @@ import org.apache.commons.codec.binary.Hex;
 /**
  *
  * @author Tod-Casasent
+ * 
+ {
+"Row1":
+{
+	"study_id":"ST001142",
+	"local_sample_id":"MUTZ3_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE",
+	"subject_type":"Cultured cells",
+	"factors":"
+		Classifications:AML | 
+		Cell Culture Media:AMEM + 20% FBS | 
+		LINE:Batch8 | 
+		Gender:male | 
+		Doubling time (hr):NA | 
+		C4-POS RAW FILE:0015_CCLE_Batch8_LIP-MUTZ3.wiff | 
+		HILIC-POS RAW FILE:0015_CCLE_Batch_8_HIL_MUTZ3.wiff | 
+		HILIC-NEG RAW FILE:0015_CCLE_Batch_8_CMH_MUTZ3.wiff"
+},
  */
 public class Factor implements Comparable<Factor>
 {
@@ -48,9 +66,12 @@ public class Factor implements Comparable<Factor>
 			pair = pair.trim();
 			//StdMwDownload.printLn("Factor init - pair=" + pair);
 			String [] nv = pair.split("\\:", -1);
-			String name = nv[0].trim();
-			String value = nv[1].trim();
-			factorMap.put(name, value);
+			if (2==nv.length)
+			{
+				String name = nv[0].trim();
+				String value = nv[1].trim();
+				factorMap.put(name, value);
+			}
 		}
 	}
 	

@@ -54,9 +54,14 @@ public class MWUrls
 		return "https://www.metabolomicsworkbench.org/rest/study/analysis_id/" + theAnalysisId + "/datatable/txt";
 	}
 
-	static public String getFactors(String theStudyId)
+	//static public String getFactors(String theStudyId)
+	//{
+	//	return "https://www.metabolomicsworkbench.org/rest/study/study_id/" + theStudyId + "/factors";
+	//}
+
+	static public String getAllFactors(String theStudyId)
 	{
-		return "https://www.metabolomicsworkbench.org/rest/study/study_id/" + theStudyId + "/factors";
+		return "https://www.metabolomicsworkbench.org/rest/study/study_id/" + theStudyId + "/allfactors";
 	}
 
 	static public String getMetabolites(String theAnalysisId)

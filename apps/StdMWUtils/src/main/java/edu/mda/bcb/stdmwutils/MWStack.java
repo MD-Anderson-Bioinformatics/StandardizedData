@@ -298,6 +298,7 @@ public class MWStack
 			OtherIdsUtil otherIdsUtil = OtherIdsUtil.readNewestOtherIdsFile();
 			DownloadConvertSingle dcs = new DownloadConvertSingle(analysis, analysisUtil, refmetUtil, otherIdsUtil, metaUtil);
 			String zip = dcs.dAndC();
+			zip = dcs.mAnalysis.study_hash + "/" + dcs.mAnalysis.hash + "/" + dcs.mAnalysis.hash + ".zip";
 			return new File(MWUrls.M_MW_ZIPTMP, zip);
 		}
 		return null;

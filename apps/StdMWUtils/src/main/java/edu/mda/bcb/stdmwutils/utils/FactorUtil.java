@@ -55,7 +55,7 @@ public class FactorUtil
 	private int loadFactors() throws MalformedURLException, IOException, NoSuchAlgorithmException, StdMwException
 	{
 		mDataMap = new DataMap<>();
-		String url = MWUrls.getFactors(mStudyId);
+		String url = MWUrls.getAllFactors(mStudyId);
 		StdMwDownload.printLn("FactorUtil - connecting to " + url);
 		int countSamples = 0;
 		try (InputStream is = new URL(url).openStream(); Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8))
@@ -66,8 +66,8 @@ public class FactorUtil
 			StdMwDownload.printLn("FactorUtil - call parse reader");
 			JsonElement jEle = JsonParser.parseReader(reader);
 			JsonObject jObj = jEle.getAsJsonObject();
-			// TODO: jObj.has("1") is a clunky way to detect if we got a single object or an array, but I haven't found an alternative
-			if (true==jObj.has("1"))
+			// TODO: jObj.has("Row1") is a clunky way to detect if we got a single object or an array, but I haven't found an alternative
+			if (true==jObj.has("Row1"))
 			{
 				StdMwDownload.printLn("FactorUtil - iterate factor");
 				for (Map.Entry<String, JsonElement> entry : jObj.entrySet())
@@ -86,6 +86,7 @@ public class FactorUtil
 				Factor factor = gson.fromJson(sumObj, Factor.class);
 				factor.init();
 				mDataMap.put(factor.hash, factor);
+				countSamples += 1;
 			}
 			StdMwDownload.printLn("FactorUtil - finished iterating");
 		}
@@ -136,7 +137,12 @@ public class FactorUtil
 			theOut.write(fac.local_sample_id.getBytes());
 			for(String name : names)
 			{
-				theOut.write(("\t" + fac.factorMap.get(name)).getBytes());
+				String val = fac.factorMap.get(name);
+				if (null==val)
+				{
+					val = "Unknown";
+				}
+				theOut.write(("\t" + val).getBytes());
 			}
 			theOut.write("\n".getBytes());
 		}

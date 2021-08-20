@@ -1,7 +1,7 @@
 # this is the docker-compose version
 version: '3.0'
 
-# file version 2021-05-17-1700
+# file version 2021-08-13-1100
 
 networks:
     # network for this compose stack
@@ -21,15 +21,14 @@ services:
             context: .
             dockerfile: Dockerfile
         container_name: stdmw_cont_hub
-        image: mdabcb/stdmw:2021-05-17-1700
+        image: mdabcb/stdmw:2021-08-13-1100
         volumes:
             # outside access for data files outside:inside
             - /SMW/MW_CACHE:/SMW/MW_CACHE:ro
             - /SMW/MW_ZIP:/SMW/MW_ZIP
             - /SMW/MW_LOGS:/opt/tomcat/logs
-            # read-only file to set time and timezone to same in image as on server
+            # read-only file to set time to same in image as on server
             - /etc/localtime:/etc/localtime:ro
-            - /etc/timezone:/etc/timezone:ro
         ports:
             # (outside)host port:container port(inside) for Tomcat
             # outside/host port is only set here (other docker compose have ports in more than one place)

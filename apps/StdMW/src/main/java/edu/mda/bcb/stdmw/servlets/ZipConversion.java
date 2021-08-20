@@ -61,6 +61,7 @@ public class ZipConversion extends HttpServlet
 				RefMetUtil refmetUtil = (RefMetUtil) (this.getServletContext().getAttribute("REFMET"));
 				OtherIdsUtil otherIdsUtil = (OtherIdsUtil) (this.getServletContext().getAttribute("OTHERIDS"));
 				DownloadConvertSingle dcs = new DownloadConvertSingle(analysis, analysisUtil, refmetUtil, otherIdsUtil, metaUtil);
+				// returns mAnalysis.hash only
 				String zip = dcs.dAndC();
 				response.setContentType("application/text;charset=UTF-8");
 				try (OutputStream out = response.getOutputStream())
@@ -74,10 +75,11 @@ public class ZipConversion extends HttpServlet
 			}
 			log("Servlet ZipConversion returning");
 		}
-		catch(Exception exp)
+		catch (Exception exp)
 		{
-			log("Error getting analysis data from MetabolomicsWorkbench", exp);
-			throw new ServletException("Error getting analysis data from MetabolomicsWorkbench", exp);
+			log("ZipConversion", exp);
+			response.setStatus(400);
+			response.sendError(400);
 		}
 	}
 

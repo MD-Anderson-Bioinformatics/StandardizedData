@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -228,23 +229,26 @@ public final class Matrix
 		Collections.sort(headers, Header.HEADER_SORTED_ORDER);
 	}
 
-	public void write(String outPath) throws FileNotFoundException, IOException
+	public int write(String outPath) throws FileNotFoundException, IOException
 	{
-		this.write(outPath, this.delim, false, null, null);
+		int col = this.write(outPath, this.delim, false, null, null);
+		return col;
 	}
 
-	public void write(String outPath, boolean theCleanHeaders, String theOriginalColumn, String theNewColumn) throws FileNotFoundException, IOException
+	public int write(String outPath, boolean theCleanHeaders, String theOriginalColumn, String theNewColumn) throws FileNotFoundException, IOException
 	{
-		this.write(outPath, this.delim, theCleanHeaders, theOriginalColumn, theNewColumn);
+		int col = this.write(outPath, this.delim, theCleanHeaders, theOriginalColumn, theNewColumn);
+		return col;
 	}
 
+	public int write(String outPath, String delimiter, boolean theCleanHeaders, String theOriginalColumn, String theNewColumn) throws FileNotFoundException, IOException
+	{
 	/**
 	 * Write the matrix. Will write in sorted order if columns/rows were sorted.
 	 * Iterates on the ArrayList row/columns instances, but checks HashSet
 	 * rowSet/columnSet instances to see if an entry was filtered out.
 	 */
-	public void write(String outPath, String delimiter, boolean theCleanHeaders, String theOriginalColumn, String theNewColumn) throws FileNotFoundException, IOException
-	{
+		int colCount = 0;
 		BufferedRandomAccessFile braf = new BufferedRandomAccessFile(this.path, "r");
 		BufferedWriter brw = new BufferedWriter(new FileWriter(new File(outPath)));
 		String idCol = this.idHeader;
@@ -268,10 +272,12 @@ public final class Matrix
 				String colLabel = col.label;
 				if (theCleanHeaders)
 				{
+					colCount += 1;
 					brw.write(delimiter + checkname_contents(colLabel));
 				}
 				else
 				{
+					colCount += 1;
 					brw.write(delimiter + colLabel);
 				}
 			}
@@ -327,6 +333,7 @@ public final class Matrix
 			braf.close();
 			brw.close();
 		}
+		return colCount;
 	}
 
 	/**
@@ -391,6 +398,88 @@ public final class Matrix
 	public boolean removeRow(String row)
 	{
 		return this.rowSet.remove(row);
+	}
+	
+	public void removeNonBatches(String theKeepColumn) throws IOException
+	{
+		BufferedRandomAccessFile braf = new BufferedRandomAccessFile(this.path, "r");
+		try
+		{
+			for (Header col : this.columns)
+			{
+				if (!col.label.equals(theKeepColumn))
+				{
+					HashMap<String, Integer> batchToCount = new HashMap<>();
+					for (Header row : this.rows)
+					{
+						if (row.index != null)
+						{
+							braf.seek((long) row.index);
+							String line = braf.getNextLine().replaceAll("\r", "").replaceAll("\n", "");
+							String[] toks = line.split(delim);
+							if (col.index != null)
+							{
+								String batch = toks[(int) col.index];
+								Integer count = batchToCount.get(batch);
+								if (null==count)
+								{
+									count = 0;
+								}
+								count += 1;
+								batchToCount.put(batch, count);
+							}
+						}
+					}
+					// remove non batch types
+					// first get total number of batches
+					int batchCount = batchToCount.size();
+					// check if any batches are "-" or ""
+					if (null!=batchToCount.get("-"))
+					{
+						// remove that from count
+						batchCount -= 1;
+					}
+					if (null!=batchToCount.get(""))
+					{
+						// remove that from count
+						batchCount -= 1;
+					}
+					if (batchCount<2)
+					{
+						// if only one batch, then remove column
+						this.removeColumn(col.label);
+					}
+					else if ((batchCount <= this.rows.size()) &&
+							 (batchCount > this.rows.size()*.9) )
+					{
+						// if number of batches equals number of samples or close to it, then remove column
+						this.removeColumn(col.label);
+					}
+					// count number of samples with non "-" and non "" batches
+					int samplesWithBatch = 0;
+					for (String batch : batchToCount.keySet())
+					{
+						if ((!"-".equals(batch))&&(!"".equals(batch)))
+						{
+							samplesWithBatch += batchToCount.get(batch);
+						}
+					}
+					// if less than 60% of samples have batches, remove column
+					if (samplesWithBatch < this.rows.size()*.6)
+					{
+						this.removeColumn(col.label);
+					}
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			throw e;
+		}
+		finally
+		{
+			braf.close();
+		}
 	}
 
 	/**
