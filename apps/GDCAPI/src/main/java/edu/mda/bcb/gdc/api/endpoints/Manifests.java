@@ -40,60 +40,63 @@ public class Manifests extends Endpoint_Mixin
 	@Override
 	protected void processJson(String theJSON)
 	{
-		//GDCAPI.printLn("Manifests::processJson - start");
-		GDCAPI.printLn("Manifests::processJson - " + mManifest.toString());
-		//GDCAPI.printLn(theJSON);
-		JsonObject jsonObj = new Gson().fromJson(theJSON, JsonObject.class);
-		JsonObject dataObj = new Gson().fromJson(jsonObj.get("data").toString(), JsonObject.class);
-		JsonArray hitsArray = dataObj.get("hits").getAsJsonArray();
-		if(0==hitsArray.size())
+		if (null!=theJSON)
 		{
-			mManifest.mNotInGDC = Boolean.TRUE;
-		}
-		else
-		{
-			mManifest.mNotInGDC = Boolean.FALSE;
-			for (JsonElement ele : hitsArray)
+			//GDCAPI.printLn("Manifests::processJson - start");
+			GDCAPI.printLn("Manifests::processJson - " + mManifest.toString());
+			//GDCAPI.printLn(theJSON);
+			JsonObject jsonObj = new Gson().fromJson(theJSON, JsonObject.class);
+			JsonObject dataObj = new Gson().fromJson(jsonObj.get("data").toString(), JsonObject.class);
+			JsonArray hitsArray = dataObj.get("hits").getAsJsonArray();
+			if(0==hitsArray.size())
 			{
-				//GDCAPI.printLn("Manifests::processJson - process element");
-				JsonObject obj = ele.getAsJsonObject();
-				String filename = obj.get("file_name").getAsString();
-				String md5sum = obj.get("md5sum").getAsString();
-				String fileUUID = obj.get("file_id").getAsString();
-				// treeset used in GDCFile object -- not not delete or clear
-				TreeMap<String, Sample> caseIdToSample = new TreeMap<>();
-				if (null!=obj.get("associated_entities"))
+				mManifest.mNotInGDC = Boolean.TRUE;
+			}
+			else
+			{
+				mManifest.mNotInGDC = Boolean.FALSE;
+				for (JsonElement ele : hitsArray)
 				{
-					JsonArray entitiesArray = obj.get("associated_entities").getAsJsonArray();
-					for (JsonElement entity : entitiesArray)
+					//GDCAPI.printLn("Manifests::processJson - process element");
+					JsonObject obj = ele.getAsJsonObject();
+					String filename = obj.get("file_name").getAsString();
+					String md5sum = obj.get("md5sum").getAsString();
+					String fileUUID = obj.get("file_id").getAsString();
+					// treeset used in GDCFile object -- not not delete or clear
+					TreeMap<String, Sample> caseIdToSample = new TreeMap<>();
+					if (null!=obj.get("associated_entities"))
 					{
-						String sampleUUID = entity.getAsJsonObject().get("entity_id").getAsString();
-						String sampleType = "-";
-						if (null!=entity.getAsJsonObject().get("entity_type"))
+						JsonArray entitiesArray = obj.get("associated_entities").getAsJsonArray();
+						for (JsonElement entity : entitiesArray)
 						{
-							sampleType = entity.getAsJsonObject().get("entity_type").getAsString();
+							String sampleUUID = entity.getAsJsonObject().get("entity_id").getAsString();
+							String sampleType = "-";
+							if (null!=entity.getAsJsonObject().get("entity_type"))
+							{
+								sampleType = entity.getAsJsonObject().get("entity_type").getAsString();
+							}
+							String sampleBarcode = entity.getAsJsonObject().get("entity_submitter_id").getAsString();
+							String caseUUID = entity.getAsJsonObject().get("case_id").getAsString();
+							Sample mySample = new Sample(sampleUUID, sampleBarcode, caseUUID, sampleType);
+							caseIdToSample.put(caseUUID, mySample);
 						}
-						String sampleBarcode = entity.getAsJsonObject().get("entity_submitter_id").getAsString();
-						String caseUUID = entity.getAsJsonObject().get("case_id").getAsString();
-						Sample mySample = new Sample(sampleUUID, sampleBarcode, caseUUID, sampleType);
-						caseIdToSample.put(caseUUID, mySample);
 					}
-				}
-				UpdateableMap<Sample> sampleList = new UpdateableMap<>();
-				UpdateableMap<Patient> patientMap = new UpdateableMap<>();
-				if (null!=obj.get("cases"))
-				{
-					JsonArray casesArray = obj.get("cases").getAsJsonArray();
-					for (JsonElement cases : casesArray)
+					UpdateableMap<Sample> sampleList = new UpdateableMap<>();
+					UpdateableMap<Patient> patientMap = new UpdateableMap<>();
+					if (null!=obj.get("cases"))
 					{
-						String patientUUID = cases.getAsJsonObject().get("case_id").getAsString();
-						String patientBarcode = cases.getAsJsonObject().get("submitter_id").getAsString();
-						patientMap.put(patientUUID, new Patient(patientUUID, patientBarcode));
-						Sample mySample = caseIdToSample.get(patientUUID);
-						sampleList.put(mySample.mUUID, mySample);
+						JsonArray casesArray = obj.get("cases").getAsJsonArray();
+						for (JsonElement cases : casesArray)
+						{
+							String patientUUID = cases.getAsJsonObject().get("case_id").getAsString();
+							String patientBarcode = cases.getAsJsonObject().get("submitter_id").getAsString();
+							patientMap.put(patientUUID, new Patient(patientUUID, patientBarcode));
+							Sample mySample = caseIdToSample.get(patientUUID);
+							sampleList.put(mySample.mUUID, mySample);
+						}
 					}
+					mManifest.addFile(new GDCFile(fileUUID, filename, md5sum, sampleList, patientMap));
 				}
-				mManifest.addFile(new GDCFile(fileUUID, filename, md5sum, sampleList, patientMap));
 			}
 		}
 		//GDCAPI.printLn("Manifests::processJson - finish");

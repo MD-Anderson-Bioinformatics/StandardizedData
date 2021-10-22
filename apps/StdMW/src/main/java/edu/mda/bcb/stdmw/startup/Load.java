@@ -10,12 +10,8 @@
 // MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 package edu.mda.bcb.stdmw.startup;
 
+import edu.mda.bcb.stdmw.utils.FIFOQueue;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
-import edu.mda.bcb.stdmwutils.utils.AnalysisUtil;
-import edu.mda.bcb.stdmwutils.utils.MetaboliteUtil;
-import edu.mda.bcb.stdmwutils.utils.SummaryUtil;
-import edu.mda.bcb.stdmwutils.utils.RefMetUtil;
-import edu.mda.bcb.stdmwutils.utils.OtherIdsUtil;
 import java.io.File;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -29,25 +25,18 @@ import org.apache.commons.io.FileUtils;
 @WebListener
 public class Load implements ServletContextListener
 {
+	static public FIFOQueue mQueue = null;
 
 	@Override
 	public void contextInitialized(ServletContextEvent sce)
 	{
+		if (null==Load.mQueue)
+		{
+			Load.mQueue = new FIFOQueue();
+		}
 		//ServletContextListener.super.contextInitialized(sce);
 		try
 		{
-			// TODO: reload this on a timer
-			sce.getServletContext().log("Load contextInitialized " + MWUrls.M_VERSION);
-			SummaryUtil summary = SummaryUtil.readNewestSummaryFile();
-			sce.getServletContext().setAttribute("SUMMARIES", summary);
-			AnalysisUtil analysis = AnalysisUtil.readNewestAnalysisFile();
-			sce.getServletContext().setAttribute("ANALYSES", analysis);
-			MetaboliteUtil metaUtil = MetaboliteUtil.readNewestMetaboliteFile();
-			sce.getServletContext().setAttribute("METABOLITE", metaUtil);
-			RefMetUtil refmetUtil = RefMetUtil.readNewestRefMetFile();
-			sce.getServletContext().setAttribute("REFMET", refmetUtil);
-			OtherIdsUtil ortherIdsUtil = OtherIdsUtil.readNewestOtherIdsFile();
-			sce.getServletContext().setAttribute("OTHERIDS", ortherIdsUtil);
 			// remove ZIPs if present
 			File dataDir = new File(MWUrls.M_MW_ZIPTMP);
 			if (dataDir.exists())
@@ -58,6 +47,16 @@ public class Load implements ServletContextListener
 					FileUtils.deleteQuietly(rm);
 				}
 			}
+			// remove live dir if present
+			File liveDir = new File(MWUrls.M_MW_CACHE, "live");
+			if (liveDir.exists())
+			{
+				FileUtils.deleteQuietly(liveDir);
+			}
+			// hack to give time for delete to occur
+			new File(MWUrls.M_MW_CACHE).list();
+			// updated used Util objects
+			Scheduled.updateUtilObjects(sce.getServletContext());
 		}
 		catch (Exception exp)
 		{

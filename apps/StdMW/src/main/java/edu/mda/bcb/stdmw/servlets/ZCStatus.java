@@ -11,14 +11,15 @@
 
 package edu.mda.bcb.stdmw.servlets;
 
+import edu.mda.bcb.stdmw.startup.Load;
 import edu.mda.bcb.stdmw.startup.Scheduled;
 import edu.mda.bcb.stdmwutils.mwdata.Analysis;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import edu.mda.bcb.stdmwutils.utils.AnalysisUtil;
-import edu.mda.bcb.stdmwutils.utils.RefMetUtil;
-import edu.mda.bcb.stdmwutils.utils.MetaboliteMapUtil;
+import edu.mda.bcb.stdmwutils.utils.DownloadConvertSingle;
 import edu.mda.bcb.stdmwutils.utils.MetaboliteUtil;
 import edu.mda.bcb.stdmwutils.utils.OtherIdsUtil;
+import edu.mda.bcb.stdmwutils.utils.RefMetUtil;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.servlet.ServletException;
@@ -29,15 +30,14 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  *
- * @author TDCasasent
+ * @author Tod-Casasent
  */
-@WebServlet(name = "mtbltmap", urlPatterns =
+@WebServlet(name = "zcstatus", urlPatterns =
 {
-	"/mtbltmap"
+	"/zcstatus"
 })
-public class MetaboliteMap extends HttpServlet
+public class ZCStatus extends HttpServlet
 {
-
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
 	 * methods.
@@ -52,41 +52,33 @@ public class MetaboliteMap extends HttpServlet
 	{
 		try
 		{
-			log("Servlet MetaboliteMap " + MWUrls.M_VERSION);
-			//SummaryUtil summaryUtil = Scheduled.getSummary();
-			AnalysisUtil analysisUtil = Scheduled.getAnalysis();
-			MetaboliteUtil metaUtil = Scheduled.getMetaUtil();
-			RefMetUtil refmetUtil = Scheduled.getRefmetUtil();
-			OtherIdsUtil otherIdsUtil = Scheduled.getOtherIdsUtil();
-			String study_hash = request.getParameter("study_hash");
-			String hash = request.getParameter("hash");
-			Analysis analysis = analysisUtil.getAnalysis(hash);
-			log("Servlet MetaboliteMap hash = " + hash);
-			if (null != analysis)
+			log("Servlet ZCStatus " + MWUrls.M_VERSION);
+			String strId = request.getParameter("job");
+			log("Servlet ZCStatus strId=" + strId);
+			long id = Long.parseLong(strId);
+			log("Servlet ZCStatus id=" + id);
+			String status = Load.mQueue.getStatus(id);
+			log("Servlet ZCStatus status=" + status);
+			if (status.equals("unknown"))
 			{
-				response.setContentType("text/tab-separated-values;charset=UTF-8");
-				response.setHeader("Content-Disposition", "attachment; filename=\"map_" + analysis.analysis_id + ".tsv\"");
-				try (OutputStream out = response.getOutputStream())
-				{
-					MetaboliteMapUtil mmu = new MetaboliteMapUtil(metaUtil, refmetUtil, otherIdsUtil);
-					mmu.streamTsv(out, analysis.analysis_id);
-				}
-				catch (Exception e)
-				{
-					System.out.println(e.getClass());
-				}
+				log("Servlet ZCStatus job " + strId + " not found");
+				throw new Exception("job " + strId + " not found");
 			}
 			else
 			{
-				throw new Exception("No Analysis found");
+				response.setContentType("application/text;charset=UTF-8");
+				try (OutputStream out = response.getOutputStream())
+				{
+					out.write(status.getBytes());
+				}
 			}
-			log("Servlet MetaboliteMap returning");
+			log("Servlet ZCStatus returning");
 		}
 		catch (Exception exp)
 		{
-			log("MetaboliteMap", exp);
+			log("ZCStatus", exp);
 			response.setStatus(400);
-			response.sendError(400);
+			response.sendError(400, "job not found");
 		}
 	}
 

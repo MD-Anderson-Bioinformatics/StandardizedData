@@ -122,7 +122,7 @@ public class MWUrls
 			}
 			else
 			{
-				result = theString.replace("\r", " ").replace("\n", " ");
+				result = theString.replace("\r", " ").replace("\n", " ").replace("\t", " ");
 			}
 			while (result.contains("  "))
 			{

@@ -326,7 +326,8 @@ public class GDCAPI
 	 */
 	static public String getVersion()
 	{
-		return "GDCAPI BEA_VERSION_TIMESTAMP";
+		return "GDCAPI 2021-10-18-0910";
+		//return "GDCAPI BEA_VERSION_TIMESTAMP";
 	}
 
 	/**

@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import edu.mda.bcb.gdc.api.GDCAPI;
 import edu.mda.bcb.gdc.api.data.DataType;
 import edu.mda.bcb.gdc.api.data.Program;
 import edu.mda.bcb.gdc.api.data.Project;
@@ -51,26 +52,45 @@ public class Workflows extends Endpoint_Mixin
 		}
 	}
 	
+	public void testOutput(String theProgram, String theProject) throws Exception
+	{
+		Project project = new Project(theProject);
+		mProject = project;
+		super.processEndpoint(); 
+	}
+	
 	@Override
 	protected void processJson(String theJSON)
 	{
-		//GDCAPI.printLn("Workflows::processJson - start");
-		//GDCAPI.printLn(theJSON);
-		JsonObject jsonObj = new Gson().fromJson(theJSON, JsonObject.class);
-		JsonObject dataObj = new Gson().fromJson(jsonObj.get("data").toString(), JsonObject.class);
-		JsonArray hitsArray = dataObj.get("hits").getAsJsonArray();
-		for (JsonElement ele : hitsArray)
+		if (null!=theJSON)
 		{
-			//GDCAPI.printLn("Workflows::processJson - process element");
-			JsonObject obj = ele.getAsJsonObject();
-			if (null!=obj.get("analysis"))
+			GDCAPI.printLn("Workflows::processJson - start");
+			GDCAPI.printLn(theJSON);
+			JsonObject jsonObj = new Gson().fromJson(theJSON, JsonObject.class);
+			JsonObject dataObj = new Gson().fromJson(jsonObj.get("data").toString(), JsonObject.class);
+			JsonArray hitsArray = dataObj.get("hits").getAsJsonArray();
+			for (JsonElement ele : hitsArray)
 			{
-				// workflow -- multiple values, with repeats, keep unique occurances
-				String workflow_type = obj.get("analysis").getAsJsonObject().get("workflow_type").getAsString();
-				// parent value to workflow type
-				String data_type = obj.get("data_type").getAsString();
-				DataType dt = mProject.addEntry(data_type);
-				dt.addEntry(workflow_type, null);
+				//GDCAPI.printLn("Workflows::processJson - process element");
+				JsonObject obj = ele.getAsJsonObject();
+				if (null!=obj.get("analysis"))
+				{
+					// workflow -- multiple values, with repeats, keep unique occurances
+					String workflow_type = obj.get("analysis").getAsJsonObject().get("workflow_type").getAsString();
+					// parent value to workflow type
+					String data_type = obj.get("data_type").getAsString();
+					DataType dt = mProject.addEntry(data_type);
+					dt.addEntry(workflow_type, null);
+				}
+				else
+				{
+					// handle current RPPA with no analysis and workflow type
+					String data_type = obj.get("data_type").getAsString();
+					if ("Protein Expression Quantification".equals(data_type))
+					{
+						String workflow_type = "RPPA";
+					}
+				}
 			}
 		}
 		//GDCAPI.printLn("Workflows::processJson - finish");

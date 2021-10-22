@@ -39,41 +39,44 @@ public class Clinicals extends Endpoint_Mixin
 	@Override
 	protected void processJson(String theJSON)
 	{
-		//GDCAPI.printLn("Clinicals::processJson - start");
-		GDCAPI.printLn("Clinicals::processJson - " + mClinical.toString());
-		//GDCAPI.printLn(theJSON);
-		JsonObject jsonObj = new Gson().fromJson(theJSON, JsonObject.class);
-		JsonObject dataObj = new Gson().fromJson(jsonObj.get("data").toString(), JsonObject.class);
-		JsonArray hitsArray = dataObj.get("hits").getAsJsonArray();
-		if(0==hitsArray.size())
+		if (null!=theJSON)
 		{
-			mClinical.mNotInGDC = Boolean.TRUE;
-		}
-		else
-		{
-			mClinical.mNotInGDC = Boolean.FALSE;
-			for (JsonElement ele : hitsArray)
+			//GDCAPI.printLn("Clinicals::processJson - start");
+			GDCAPI.printLn("Clinicals::processJson - " + mClinical.toString());
+			//GDCAPI.printLn(theJSON);
+			JsonObject jsonObj = new Gson().fromJson(theJSON, JsonObject.class);
+			JsonObject dataObj = new Gson().fromJson(jsonObj.get("data").toString(), JsonObject.class);
+			JsonArray hitsArray = dataObj.get("hits").getAsJsonArray();
+			if(0==hitsArray.size())
 			{
-				//GDCAPI.printLn("Clinicals::processJson - process element");
-				JsonObject obj = ele.getAsJsonObject();
-				String filename = obj.get("file_name").getAsString();
-				String md5sum = obj.get("md5sum").getAsString();
-				String fileUUID = obj.get("file_id").getAsString();
-				// treeset used in GDCFile object -- not not delete or clear
-				UpdateableMap<Sample> sampleList = new UpdateableMap<>();
-				// treeset used in GDCFile object -- not not delete or clear
-				UpdateableMap<Patient> patientMap = new UpdateableMap<>();
-				if (null!=obj.get("cases"))
+				mClinical.mNotInGDC = Boolean.TRUE;
+			}
+			else
+			{
+				mClinical.mNotInGDC = Boolean.FALSE;
+				for (JsonElement ele : hitsArray)
 				{
-					JsonArray casesArray = obj.get("cases").getAsJsonArray();
-					for (JsonElement cases : casesArray)
+					//GDCAPI.printLn("Clinicals::processJson - process element");
+					JsonObject obj = ele.getAsJsonObject();
+					String filename = obj.get("file_name").getAsString();
+					String md5sum = obj.get("md5sum").getAsString();
+					String fileUUID = obj.get("file_id").getAsString();
+					// treeset used in GDCFile object -- not not delete or clear
+					UpdateableMap<Sample> sampleList = new UpdateableMap<>();
+					// treeset used in GDCFile object -- not not delete or clear
+					UpdateableMap<Patient> patientMap = new UpdateableMap<>();
+					if (null!=obj.get("cases"))
 					{
-						String patientUUID = cases.getAsJsonObject().get("case_id").getAsString();
-						String patientBarcode = cases.getAsJsonObject().get("submitter_id").getAsString();
-						patientMap.put(patientUUID, new Patient(patientUUID, patientBarcode));
+						JsonArray casesArray = obj.get("cases").getAsJsonArray();
+						for (JsonElement cases : casesArray)
+						{
+							String patientUUID = cases.getAsJsonObject().get("case_id").getAsString();
+							String patientBarcode = cases.getAsJsonObject().get("submitter_id").getAsString();
+							patientMap.put(patientUUID, new Patient(patientUUID, patientBarcode));
+						}
 					}
+					mClinical.addFile(new GDCFile(fileUUID, filename, md5sum, sampleList, patientMap));
 				}
-				mClinical.addFile(new GDCFile(fileUUID, filename, md5sum, sampleList, patientMap));
 			}
 		}
 		//GDCAPI.printLn("Clinicals::processJson - finish");

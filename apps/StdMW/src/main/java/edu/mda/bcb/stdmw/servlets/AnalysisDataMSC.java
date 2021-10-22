@@ -11,6 +11,7 @@
 
 package edu.mda.bcb.stdmw.servlets;
 
+import edu.mda.bcb.stdmw.startup.Scheduled;
 import edu.mda.bcb.stdmwutils.mwdata.Analysis;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import edu.mda.bcb.stdmwutils.utils.AnalysisUtil;
@@ -51,7 +52,7 @@ public class AnalysisDataMSC extends HttpServlet
 			log("Servlet AnalysisDataMSC " + MWUrls.M_VERSION);
 			String study_hash = request.getParameter("study_hash");
 			String hash = request.getParameter("hash");
-			AnalysisUtil analysisUtil = (AnalysisUtil)(this.getServletContext().getAttribute("ANALYSES"));
+			AnalysisUtil analysisUtil = Scheduled.getAnalysis();
 			Analysis analysis = analysisUtil.getAnalysis(hash);
 			if (null!=analysis)
 			{

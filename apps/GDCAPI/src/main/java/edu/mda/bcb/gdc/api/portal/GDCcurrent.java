@@ -17,6 +17,7 @@ import edu.mda.bcb.gdc.api.convert.MethylationTXT;
 import edu.mda.bcb.gdc.api.convert.MirnaTXT;
 import edu.mda.bcb.gdc.api.convert.MutationMAF;
 import edu.mda.bcb.gdc.api.convert.RnaseqTXT;
+import edu.mda.bcb.gdc.api.convert.RppaTSV;
 import edu.mda.bcb.gdc.api.convert.Snp6TXT;
 import edu.mda.bcb.gdc.api.data.DataType;
 import edu.mda.bcb.gdc.api.data.Program;
@@ -271,6 +272,15 @@ public class GDCcurrent extends GDC_Mixin
 				if (checkDirs(theDownloadDir, myDir))
 				{
 					MethylationTXT.processDirectory(theWorkflow.mManifest, theDownloadDir, myDir, theBiospecimenDir, theClinicalDir, true);
+				}
+			}
+			else if ("RPPA".equals(theWorkflow.mName))
+			{
+				// RPPA value was made up in Workflows.java, as GDC has metadata bug for this type
+				File myDir = new File(theConvertDir, theWorkflow.mManifest.getDatasetName("standardized").get(0));
+				if (checkDirs(theDownloadDir, myDir))
+				{
+					RppaTSV.processDirectory(theWorkflow.mManifest, theDownloadDir, myDir, theBiospecimenDir, theClinicalDir, false);
 				}
 			}
 			else if ("STAR - Counts".equals(theWorkflow.mName))

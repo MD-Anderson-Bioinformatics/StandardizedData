@@ -137,6 +137,7 @@ public class SummaryUtil
 		StdMwDownload.printLn("readSummaries input = " + input.getAbsolutePath());
 		try (BufferedReader br = java.nio.file.Files.newBufferedReader(input.toPath(), Charset.availableCharsets().get("UTF-8")))
 		{
+			long counter = 0;
 			// headers
 			String line = br.readLine();
 			ArrayList<String> headers = new ArrayList<>();
@@ -145,9 +146,17 @@ public class SummaryUtil
 			line = br.readLine();
 			while (null != line)
 			{
-				// empty string for no prefix on headers
-				Summary sum = Summary.getFromRowString(headers, line, "");
-				mDataMap.put(sum.hash, sum);
+				counter += 1;
+				try
+				{
+					// empty string for no prefix on headers
+					Summary sum = Summary.getFromRowString(headers, line, "");
+					mDataMap.put(sum.hash, sum);
+				}
+				catch(Exception exp)
+				{
+					StdMwDownload.printErr("Exception reading line " + counter + " of file " + input.getAbsolutePath(), exp);
+				}
 				line = br.readLine();
 			}
 		}

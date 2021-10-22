@@ -11,6 +11,7 @@
 
 package edu.mda.bcb.gdc.api.endpoints;
 
+import edu.mda.bcb.gdc.api.GDCAPI;
 import edu.mda.bcb.gdc.api.data.Fileable;
 import edu.mda.bcb.gdc.api.data.GDCFile;
 import edu.mda.bcb.gdc.api.util.Updateable_Mixin;
@@ -55,7 +56,7 @@ public class DataDownload extends Endpoint_Mixin
 		// check results, not JSON
 		if (null==theJSON)
 		{
-			throw new Exception("Unable to download " + mGDCFile + " to " + mDownloadDir);
+			GDCAPI.printWarn("Unable to download " + mGDCFile + " to " + mDownloadDir + ". May be redacted.");
 		}
 	}
 

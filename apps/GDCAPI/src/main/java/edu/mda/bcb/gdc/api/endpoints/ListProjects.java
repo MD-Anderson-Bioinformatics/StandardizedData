@@ -44,21 +44,24 @@ public class ListProjects extends Endpoint_Mixin
 	@Override
 	protected void processJson(String theJSON)
 	{
-		//GDCAPI.printLn(theJSON);
-		GDCAPI.printLn("ListProjects::processJson - start");
-		JsonObject jsonObj = new Gson().fromJson(theJSON, JsonObject.class);
-		JsonObject dataObj = new Gson().fromJson(jsonObj.get("data").toString(), JsonObject.class);
-		JsonArray hitsArray = dataObj.get("hits").getAsJsonArray();
-		for (JsonElement ele : hitsArray)
+		if (null!=theJSON)
 		{
-			//GDCAPI.printLn("ListProjects::processJson - process element");
-			JsonObject obj = ele.getAsJsonObject();
-			// first token in project id, like TCGA
-			String program = obj.get("program").getAsJsonObject().get("name").getAsString();
-			// program and disease code, like TCGA-BRCA
-			String project = obj.get("project_id").getAsString();
-			//
-			mGDC.addEntry(program, project);
+			//GDCAPI.printLn(theJSON);
+			GDCAPI.printLn("ListProjects::processJson - start");
+			JsonObject jsonObj = new Gson().fromJson(theJSON, JsonObject.class);
+			JsonObject dataObj = new Gson().fromJson(jsonObj.get("data").toString(), JsonObject.class);
+			JsonArray hitsArray = dataObj.get("hits").getAsJsonArray();
+			for (JsonElement ele : hitsArray)
+			{
+				//GDCAPI.printLn("ListProjects::processJson - process element");
+				JsonObject obj = ele.getAsJsonObject();
+				// first token in project id, like TCGA
+				String program = obj.get("program").getAsJsonObject().get("name").getAsString();
+				// program and disease code, like TCGA-BRCA
+				String project = obj.get("project_id").getAsString();
+				//
+				mGDC.addEntry(program, project);
+			}
 		}
 		GDCAPI.printLn("ListProjects::processJson - finish");
 	}

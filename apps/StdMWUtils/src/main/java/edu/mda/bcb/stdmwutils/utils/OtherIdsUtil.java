@@ -102,7 +102,16 @@ public class OtherIdsUtil
 						JsonObject sumObj = entry.getValue().getAsJsonObject();
 						OtherId otherid = gson.fromJson(sumObj, OtherId.class);
 						// primary pubchem_cid, secondary name
-						mDataToSet.put(otherid.pubchem_cid, otherid);
+						// ignore 156700 regno until MW can fix it, as it seems to be wrong
+						// https://www.metabolomicsworkbench.org/rest/compound/pubchem_cid/119046/all
+						if (("156700".equals(otherid.regno))&&("119046".equals(otherid.pubchem_cid)))
+						{
+							StdMwDownload.printLn("fetchOtherIds - skipping 156700 119046");
+						}
+						else
+						{
+							mDataToSet.put(otherid.pubchem_cid, otherid);
+						}
 					}
 					StdMwDownload.printLn("fetchOtherIds - finished iterating");
 				}

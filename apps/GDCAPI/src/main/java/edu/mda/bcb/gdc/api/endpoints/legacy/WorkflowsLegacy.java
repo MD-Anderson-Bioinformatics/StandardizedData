@@ -112,19 +112,22 @@ public class WorkflowsLegacy extends Endpoint_Mixin
 	@Override
 	protected void processJson(String theJSON)
 	{
-		//GDCAPI.printLn("WorkflowsLegacy::processJson - start");
-		//GDCAPI.printLn(theJSON);
-		JsonObject jsonObj = new Gson().fromJson(theJSON, JsonObject.class);
-		JsonObject dataObj = new Gson().fromJson(jsonObj.get("data").toString(), JsonObject.class);
-		JsonArray hitsArray = dataObj.get("hits").getAsJsonArray();
-		for (JsonElement ele : hitsArray)
+		if (null!=theJSON)
 		{
-			//GDCAPI.printLn("WorkflowsLegacy::processJson - process element");
-			JsonObject obj = ele.getAsJsonObject();
-			String data_type = processForJsonString(obj, mWorkflowDatatype);
-			String workflow_type = processForJsonString(obj, mWorkflowPlatform);
-			DataType dt = mProject.addEntry(data_type);
-			dt.addEntry(workflow_type, mWorkflowName);
+			//GDCAPI.printLn("WorkflowsLegacy::processJson - start");
+			//GDCAPI.printLn(theJSON);
+			JsonObject jsonObj = new Gson().fromJson(theJSON, JsonObject.class);
+			JsonObject dataObj = new Gson().fromJson(jsonObj.get("data").toString(), JsonObject.class);
+			JsonArray hitsArray = dataObj.get("hits").getAsJsonArray();
+			for (JsonElement ele : hitsArray)
+			{
+				//GDCAPI.printLn("WorkflowsLegacy::processJson - process element");
+				JsonObject obj = ele.getAsJsonObject();
+				String data_type = processForJsonString(obj, mWorkflowDatatype);
+				String workflow_type = processForJsonString(obj, mWorkflowPlatform);
+				DataType dt = mProject.addEntry(data_type);
+				dt.addEntry(workflow_type, mWorkflowName);
+			}
 		}
 		//GDCAPI.printLn("WorkflowsLegacy::processJson - finish");
 	}

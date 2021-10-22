@@ -11,6 +11,7 @@
 
 package edu.mda.bcb.stdmw.servlets;
 
+import edu.mda.bcb.stdmw.startup.Scheduled;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import edu.mda.bcb.stdmwutils.utils.SummaryUtil;
 import java.io.IOException;
@@ -47,7 +48,7 @@ public class Studies extends HttpServlet
 		try
 		{
 			log("Servlet Studies " + MWUrls.M_VERSION);
-			SummaryUtil summaryUtil = (SummaryUtil)(this.getServletContext().getAttribute("SUMMARIES"));
+			SummaryUtil summaryUtil = Scheduled.getSummary();
 			response.setContentType("application/json;charset=UTF-8");
 			try (PrintWriter out = response.getWriter())
 			{

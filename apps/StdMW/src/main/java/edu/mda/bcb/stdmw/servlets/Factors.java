@@ -11,6 +11,7 @@
 
 package edu.mda.bcb.stdmw.servlets;
 
+import edu.mda.bcb.stdmw.startup.Scheduled;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import edu.mda.bcb.stdmwutils.mwdata.Summary;
 import edu.mda.bcb.stdmwutils.utils.FactorUtil;
@@ -49,7 +50,7 @@ public class Factors extends HttpServlet
 		try
 		{
 			log("Servlet Factors " + MWUrls.M_VERSION);
-			SummaryUtil summaryUtil = (SummaryUtil)(this.getServletContext().getAttribute("SUMMARIES"));
+			SummaryUtil summaryUtil = Scheduled.getSummary();
 			String hash = request.getParameter("hash");
 			log("Servlet Factors hash = " + hash);
 			Summary summary = summaryUtil.get(hash);

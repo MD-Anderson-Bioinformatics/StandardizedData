@@ -11,6 +11,7 @@
 
 package edu.mda.bcb.stdmw.servlets;
 
+import edu.mda.bcb.stdmw.startup.Scheduled;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import edu.mda.bcb.stdmwutils.utils.MwTableUtil;
 import edu.mda.bcb.stdmwutils.utils.AnalysisUtil;
@@ -51,10 +52,10 @@ public class AnalysisTableData extends HttpServlet
 		try
 		{
 			log("Servlet AnalysisTableData " + MWUrls.M_VERSION);
-			SummaryUtil summaryUtil = (SummaryUtil)(this.getServletContext().getAttribute("SUMMARIES"));
-			AnalysisUtil analysisUtil = (AnalysisUtil)(this.getServletContext().getAttribute("ANALYSES"));
-			MetaboliteUtil metaUtil = (MetaboliteUtil)(this.getServletContext().getAttribute("METABOLITE"));
-			RefMetUtil refmetUtil = (RefMetUtil)(this.getServletContext().getAttribute("REFMET"));
+			SummaryUtil summaryUtil = Scheduled.getSummary();
+			AnalysisUtil analysisUtil = Scheduled.getAnalysis();
+			MetaboliteUtil metaUtil = Scheduled.getMetaUtil();
+			RefMetUtil refmetUtil = Scheduled.getRefmetUtil();
 			response.setContentType("application/json;charset=UTF-8");
 			MwTableUtil mt = new MwTableUtil(summaryUtil, analysisUtil, metaUtil, refmetUtil);
 			try (PrintWriter out = response.getWriter())

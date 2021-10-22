@@ -38,19 +38,22 @@ public class DataTypes extends Endpoint_Mixin
 	@Override
 	protected void processJson(String theJSON)
 	{
-		//GDCAPI.printLn("DataTypes::processJson - start");
-		GDCAPI.printLn("DataTypes::processJson - for: " + mProgram + ", " + mProject + ", " + mDataType);
-		//GDCAPI.printLn(theJSON);
-		JsonObject jsonObj = new Gson().fromJson(theJSON, JsonObject.class);
-		JsonObject dataObj = new Gson().fromJson(jsonObj.get("data").toString(), JsonObject.class);
-		JsonArray hitsArray = dataObj.get("hits").getAsJsonArray();
-		for (JsonElement ele : hitsArray)
+		if (null!=theJSON)
 		{
-			//GDCAPI.printLn("DataTypes::processJson - process element");
-			JsonObject obj = ele.getAsJsonObject();
-			if (null!=obj.get("analysis"))
+			//GDCAPI.printLn("DataTypes::processJson - start");
+			GDCAPI.printLn("DataTypes::processJson - for: " + mProgram + ", " + mProject + ", " + mDataType);
+			//GDCAPI.printLn(theJSON);
+			JsonObject jsonObj = new Gson().fromJson(theJSON, JsonObject.class);
+			JsonObject dataObj = new Gson().fromJson(jsonObj.get("data").toString(), JsonObject.class);
+			JsonArray hitsArray = dataObj.get("hits").getAsJsonArray();
+			for (JsonElement ele : hitsArray)
 			{
-				String data_type = obj.get("").getAsString();
+				//GDCAPI.printLn("DataTypes::processJson - process element");
+				JsonObject obj = ele.getAsJsonObject();
+				if (null!=obj.get("analysis"))
+				{
+					String data_type = obj.get("").getAsString();
+				}
 			}
 		}
 		//GDCAPI.printLn("DataTypes::processJson - finish");

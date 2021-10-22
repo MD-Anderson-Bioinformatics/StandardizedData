@@ -61,19 +61,22 @@ public class DownloadConvertSingle
 	
 	public String downloadLocation()
 	{
-		// Do not use path, since it is exposed in the web aoo
+		// Do not use path, since it is exposed in the web app
 		//String loc = mAnalysis.study_hash + "/" + mAnalysis.hash + "/" + mAnalysis.hash + ".zip";
 		return mAnalysis.hash;
 	}
 	
 	public String dAndC() throws IOException, NoSuchAlgorithmException, MalformedURLException, StdMwException, Exception
 	{
-		downloadDataOptions();
-		convertDataOptions();
-		cleanupDataOptions();
+		File zip = new File(getZipDir(true), mAnalysis.hash + ".zip");
+		if (!zip.exists())
+		{
+			downloadDataOptions();
+			convertDataOptions();
+			cleanupDataOptions();
+		}
 		return downloadLocation();
 	}
-	
 	
 	protected File getZipDir(boolean theMkFlag)
 	{

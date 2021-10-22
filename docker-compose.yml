@@ -1,7 +1,7 @@
 # this is the docker-compose version
 version: '3.0'
 
-# file version 2021-08-13-1100
+# file version 2021-10-14-0919
 
 networks:
     # network for this compose stack
@@ -21,7 +21,7 @@ services:
             context: .
             dockerfile: Dockerfile
         container_name: stdmw_cont_hub
-        image: mdabcb/stdmw:2021-08-13-1100
+        image: mdabcb/stdmw:2021-10-14-0919
         volumes:
             # outside access for data files outside:inside
             - /SMW/MW_CACHE:/SMW/MW_CACHE:ro

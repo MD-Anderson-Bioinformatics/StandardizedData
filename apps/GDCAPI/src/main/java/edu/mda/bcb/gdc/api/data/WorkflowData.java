@@ -263,7 +263,6 @@ public class WorkflowData extends Fileable implements Comparable<WorkflowData>
 			// TODO: update STAR conversion
 			dsNames.add(theFirstString + "-discrete");
 		}
-		
 		else if ("Affymetrix SNP Array 6.0-hg19-nocnv".equals(mWorkflow))
 		{
 			dsNames.add(theFirstString + "-discrete");
@@ -300,6 +299,11 @@ public class WorkflowData extends Fileable implements Comparable<WorkflowData>
 		}
 		else if ("MDA_RPPA_Core".equals(mWorkflow))
 		{
+			dsNames.add(theFirstString + "-continuous");
+		}
+		else if ("RPPA".equals(mWorkflow))
+		{
+			// workflow name generated in Workflows.java due to bad GDC metadata
 			dsNames.add(theFirstString + "-continuous");
 		}
 		else if ("miRNA gene quantification-gene-hg19-miRNA".equals(mWorkflow))

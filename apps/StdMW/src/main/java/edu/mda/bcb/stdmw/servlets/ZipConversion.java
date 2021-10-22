@@ -11,6 +11,8 @@
 
 package edu.mda.bcb.stdmw.servlets;
 
+import edu.mda.bcb.stdmw.startup.Load;
+import edu.mda.bcb.stdmw.startup.Scheduled;
 import edu.mda.bcb.stdmwutils.mwdata.Analysis;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import edu.mda.bcb.stdmwutils.utils.AnalysisUtil;
@@ -36,7 +38,6 @@ import javax.servlet.http.HttpServletResponse;
 })
 public class ZipConversion extends HttpServlet
 {
-
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
 	 * methods.
@@ -49,37 +50,64 @@ public class ZipConversion extends HttpServlet
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException
 	{
-		try
+		log("Before Sync Block for Servlet ZipConversion " + MWUrls.M_VERSION);
+		// get new job id, -1 means queue too long try again in 5 min
+		long jobId = Load.mQueue.newJob();
+		log("jobId=" + jobId);
+		if (jobId<0)
 		{
-			log("Servlet ZipConversion " + MWUrls.M_VERSION);
-			String hash = request.getParameter("hash");
-			AnalysisUtil analysisUtil = (AnalysisUtil)(this.getServletContext().getAttribute("ANALYSES"));
-			Analysis analysis = analysisUtil.getAnalysis(hash);
-			if (null!=analysis)
+			// return queue too long try again
+			response.setContentType("application/text;charset=UTF-8");
+			try (OutputStream out = response.getOutputStream())
 			{
-				MetaboliteUtil metaUtil = (MetaboliteUtil) (this.getServletContext().getAttribute("METABOLITE"));
-				RefMetUtil refmetUtil = (RefMetUtil) (this.getServletContext().getAttribute("REFMET"));
-				OtherIdsUtil otherIdsUtil = (OtherIdsUtil) (this.getServletContext().getAttribute("OTHERIDS"));
-				DownloadConvertSingle dcs = new DownloadConvertSingle(analysis, analysisUtil, refmetUtil, otherIdsUtil, metaUtil);
-				// returns mAnalysis.hash only
-				String zip = dcs.dAndC();
-				response.setContentType("application/text;charset=UTF-8");
-				try (OutputStream out = response.getOutputStream())
+				out.write("MSG: Queue is too long. Please try again later.".getBytes());
+			}
+		}
+		else
+		{
+			// return job id
+			response.setContentType("application/text;charset=UTF-8");
+			try (OutputStream out = response.getOutputStream())
+			{
+				out.write(Long.toString(jobId).getBytes());
+			}
+			synchronized(ZipConversion.class)
+			{
+				log("jobId=" + jobId);
+				if (Load.mQueue.isGood(jobId))
 				{
-					out.write(zip.getBytes());
+					try
+					{
+						log("Servlet ZipConversion " + MWUrls.M_VERSION);
+						String hash = request.getParameter("hash");
+						AnalysisUtil analysisUtil = Scheduled.getAnalysis();
+						Analysis analysis = analysisUtil.getAnalysis(hash);
+						if (null!=analysis)
+						{
+							MetaboliteUtil metaUtil = Scheduled.getMetaUtil();
+							RefMetUtil refmetUtil = Scheduled.getRefmetUtil();
+							OtherIdsUtil otherIdsUtil = Scheduled.getOtherIdsUtil();
+							DownloadConvertSingle dcs = new DownloadConvertSingle(analysis, analysisUtil, refmetUtil, otherIdsUtil, metaUtil);
+							// returns mAnalysis.hash only
+							String zip = dcs.dAndC();
+							log("Servlet ZipConversion mQueue finish jobid=" + jobId + " and zip=" + zip);
+							Load.mQueue.finish(jobId, zip);
+						}
+						else
+						{
+							throw new Exception("No analysis found");
+						}
+						log("Servlet ZipConversion returning");
+					}
+					catch (Exception exp)
+					{
+						log("ZipConversion", exp);
+						response.setStatus(400);
+						response.sendError(400);
+					}
 				}
 			}
-			else
-			{
-				throw new Exception("No analysis found");
-			}
-			log("Servlet ZipConversion returning");
-		}
-		catch (Exception exp)
-		{
-			log("ZipConversion", exp);
-			response.setStatus(400);
-			response.sendError(400);
+			log("After Sync Block for Servlet ZipConversion " + MWUrls.M_VERSION);
 		}
 	}
 

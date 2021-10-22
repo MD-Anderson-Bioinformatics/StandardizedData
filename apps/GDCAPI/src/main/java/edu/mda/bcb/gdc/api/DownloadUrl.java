@@ -76,6 +76,10 @@ public class DownloadUrl
 			URL redirectUrl = new URL(theConnection.getHeaderField("Location"));
 			GDCAPI.printLn("Download_Mixin::makeConnection redirectUrl = " + redirectUrl);
 		}
+		else if ((451==code)||(403==code))
+		{
+			GDCAPI.printLn("Download_Mixin::makeConnection Redacted/Forbidden = " + theConnection.getURL());
+		}
 		return code;
 	}
 
@@ -117,8 +121,21 @@ public class DownloadUrl
 				wr.write(mParameters.getBytes());
 			}
 			wr.flush();
-			checkResponseCode(theConnection);
-			result = IOUtils.toString(theConnection.getInputStream(), Charset.defaultCharset());
+			int responseCode = checkResponseCode(theConnection);
+			if ((451==responseCode)||(403==responseCode))
+			{
+				GDCAPI.printLn("Skip downloadToString, redacted/forbidden file " + mDestFile + " for URL=" + mUrl);
+				if (mDestFile.exists())
+				{
+					mDestFile.delete();
+				}
+				result = null;
+			}
+			else
+			{
+				result = IOUtils.toString(theConnection.getInputStream(), Charset.defaultCharset());
+				System.out.println(result);
+			}
 		}
 		return result;
 	}
@@ -129,24 +146,36 @@ public class DownloadUrl
 		File downloadFile = null;
 		try
 		{
-			checkResponseCode(theConnection);
-			String filename = theConnection.getHeaderField("Content-Disposition");
-			if (filename.contains("filename="))
+			int responseCode = checkResponseCode(theConnection);
+			if ((451==responseCode)||(403==responseCode))
 			{
-				filename = filename.substring(filename.lastIndexOf("filename=") + "filename=".length());
-			}
-			downloadFile = new File(mDestFile, filename);
-			GDCAPI.printLn("downloadToDir filename " + filename + " for URL=" + mUrl);
-			if (downloadFile.exists())
-			{
-				GDCAPI.printLn("Skip download, already downloaded " + filename + " for URL=" + mUrl);
+				GDCAPI.printLn("Skip downloadToDir, redacted/forbidden file " + mDestFile + " for URL=" + mUrl);
+				if (mDestFile.exists())
+				{
+					mDestFile.delete();
+				}
+				result = null;
 			}
 			else
 			{
-				org.apache.commons.io.FileUtils.copyInputStreamToFile(theConnection.getInputStream(), mDestFile);
-				GDCAPI.printLn("Download succeeded 1: " + mDestFile + " for URL=" + mUrl);
+				String filename = theConnection.getHeaderField("Content-Disposition");
+				if (filename.contains("filename="))
+				{
+					filename = filename.substring(filename.lastIndexOf("filename=") + "filename=".length());
+				}
+				downloadFile = new File(mDestFile, filename);
+				GDCAPI.printLn("downloadToDir filename " + filename + " for URL=" + mUrl);
+				if (downloadFile.exists())
+				{
+					GDCAPI.printLn("Skip download, already downloaded " + filename + " for URL=" + mUrl);
+				}
+				else
+				{
+					org.apache.commons.io.FileUtils.copyInputStreamToFile(theConnection.getInputStream(), mDestFile);
+					GDCAPI.printLn("Download succeeded 1: " + mDestFile + " for URL=" + mUrl);
+				}
+				result = downloadFile;
 			}
-			result = downloadFile;
 		}
 		catch (Exception rethrownExp)
 		{
@@ -168,17 +197,27 @@ public class DownloadUrl
 		File result = null;
 		try
 		{
-			checkResponseCode(theConnection);
-			if (mDestFile.exists())
+			int responseCode = checkResponseCode(theConnection);
+			if ((451==responseCode)||(403==responseCode))
+			{
+				GDCAPI.printLn("Skip download, redacted/forbidden file " + mDestFile + " for URL=" + mUrl);
+				if (mDestFile.exists())
+				{
+					mDestFile.delete();
+				}
+				result = null;
+			}
+			else if (mDestFile.exists())
 			{
 				GDCAPI.printLn("Skip download, already downloaded " + mDestFile + " for URL=" + mUrl);
+				result = mDestFile;
 			}
 			else
 			{
 				org.apache.commons.io.FileUtils.copyInputStreamToFile(theConnection.getInputStream(), mDestFile);
 				GDCAPI.printLn("Download succeeded 2: " + mDestFile + " for URL=" + mUrl);
+				result = mDestFile;
 			}
-			result = mDestFile;
 		}
 		catch (Exception rethrownExp)
 		{
@@ -213,11 +252,27 @@ public class DownloadUrl
 				}
 				else if (mDestFile.isDirectory())
 				{
-					result = downloadToDir(connection).getAbsolutePath();
+					File tmp = downloadToDir(connection);
+					if (null!=tmp)
+					{
+						result = tmp.getAbsolutePath();
+					}
+					else
+					{
+						result = null;
+					}
 				}
 				else if (!mDestFile.isDirectory())
 				{
-					result = downloadToFile(connection).getAbsolutePath();
+					File tmp = downloadToFile(connection);
+					if (null!=tmp)
+					{
+						result = tmp.getAbsolutePath();
+					}
+					else
+					{
+						result = null;
+					}
 				}
 				else
 				{

@@ -38,6 +38,56 @@
 			////////////////////////////////////////////////////////////////
 			//// download zip conversions
 			////////////////////////////////////////////////////////////////
+			var downloadInterval = null;
+			checkStatusAndDownload = function(theJobId, theAnalysisHash, theStudyHash)
+			{
+				// if status != pending, then download
+				console.log("checkStatusAndDownload");
+				console.log("theJobId=" + theJobId);
+				console.log("theAnalysisHash=" + theAnalysisHash);
+				console.log("theStudyHash=" + theStudyHash);
+				$.ajax(
+						{
+							type: "GET",
+							dataType: 'text',
+							async: true,
+							url: "zcstatus",
+							cache: false,
+							beforeSend: function ()
+							{
+								//disableInput();
+							},
+							complete: function ()
+							{
+								//enableInput();
+							},
+							data:
+							{
+								job: theJobId
+							},
+							success: function (theString)
+							{
+								console.log("theString=" + theString);
+								if ("pending"!==theString)
+								{
+									clearInterval(downloadInterval);
+									console.log("theAnalysisHash=" + theAnalysisHash);
+									console.log("theStudyHash=" + theStudyHash);
+									window.location.href = 'zipdl?analysis_hash=' + theAnalysisHash + '&study_hash=' + theStudyHash;
+									enableInput();
+								}
+							},
+							error: function (jqXHR, textStatus, errorThrown)
+							{
+								console.log("zipc :" + textStatus + " and " + errorThrown);
+								console.log(jqXHR);
+								clearInterval(downloadInterval);
+								alert("zipc :" + textStatus + " and " + errorThrown);
+								enableInput();
+							}
+						});
+			};
+
 			downloadZipConversion = function (theAnalysisHash, theStudyHash)
 			{
 				console.log("downloadZipConversion theHash = " + theAnalysisHash);
@@ -55,7 +105,8 @@
 							},
 							complete: function ()
 							{
-								enableInput();
+								// Do not do this here. Do this in the checkStatusAndDownload complete
+								//enableInput();
 							},
 							data:
 							{
@@ -65,12 +116,14 @@
 							success: function (theString)
 							{
 								console.log("zipc :" + theString);
-								window.location.href = 'zipdl?analysis_hash=' + theAnalysisHash + '&study_hash=' + theStudyHash;
+								// check every 30 seconds
+								downloadInterval = setInterval(function() {checkStatusAndDownload(theString, theAnalysisHash, theStudyHash)}, 30000);
 							},
 							error: function (jqXHR, textStatus, errorThrown)
 							{
 								console.log("zipc :" + textStatus + " and " + errorThrown);
 								alert("zipc :" + textStatus + " and " + errorThrown);
+								enableInput();
 							}
 						});
 			};
@@ -187,18 +240,17 @@
 													{
 														metaboliteMapButton = "<button class='buttons' style='font-size: x-small !important;' onclick='downloadMetaboliteMap(\"" + analysisHash + "\", \"" + studyHash + "\");'>Metabolites</button>";
 													}
-													downloadZipConversion
 													result = "<button class='buttons' style='font-size: x-small !important;' onclick='downloadZipConversion(\"" + analysisHash + "\", \"" + studyHash + "\");'>Download Zip Conversion</button>\r" +
 															metaboliteMapButton + "\r" +
-															"<img width='16' height='16' src='images/tooltip.png' title='Data download options described under the main hamburger menu. Options represent common methods of interpretting MW.org data.'></img>"
+															"<img width='16' height='16' src='images/tooltip.png' title='Data download detailsdescribed under the main hamburger menu. Downloads are single threaded on the server so may be delayed.'></img>";
 												}
 												return result;
-											},
+											}
 										},
 										{title: "Metabolite Count", data: "metabolite_count", className: "dt-center"},
 										{title: "Sample Count", data: "study.sample_count", className: "dt-center"},
 										{title: "RefMet Count", data: "refmet_count", className: "dt-center"},
-										{title: "Factors", data: "study.factors[, ]"},
+										{title: "Factors", data: "study.factors[, ]"}
 									],
 							order: [[1, 'asc']]
 						});

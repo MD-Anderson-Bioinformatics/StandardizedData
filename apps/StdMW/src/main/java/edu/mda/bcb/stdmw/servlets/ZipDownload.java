@@ -69,7 +69,8 @@ public class ZipDownload extends HttpServlet
 						Files.copy(zipFile, out);
 						out.flush();
 					}
-					zipFile.delete();
+					// do not delete. Once a day, anything over an hour old is deleted
+					//zipFile.delete();
 				}
 				else
 				{
