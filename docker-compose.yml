@@ -1,7 +1,7 @@
-# this is the docker-compose version
+# this is the docker compose version
 version: '3.0'
 
-# file version 2021-10-14-0919
+# file version 2023-05-17-1317
 
 networks:
     # network for this compose stack
@@ -21,11 +21,11 @@ services:
             context: .
             dockerfile: Dockerfile
         container_name: stdmw_cont_hub
-        image: mdabcb/stdmw:2021-10-14-0919
+        image: mdabcb/stdmw:2023-05-17-1317
         volumes:
             # outside access for data files outside:inside
-            - /SMW/MW_CACHE:/SMW/MW_CACHE:ro
-            - /SMW/MW_ZIP:/SMW/MW_ZIP
+            - /SMW/MW_CACHE:/MWB/MW_CACHE:ro
+            - /SMW/MW_ZIP:/MWB/MW_TMP
             - /SMW/MW_LOGS:/opt/tomcat/logs
             # read-only file to set time to same in image as on server
             - /etc/localtime:/etc/localtime:ro

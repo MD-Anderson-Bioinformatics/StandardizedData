@@ -1,4 +1,4 @@
-// Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -23,9 +23,12 @@ public class MWUrls
 {
 
 	static public String M_VERSION = "StdMW BEA_VERSION_TIMESTAMP";
-	static public String M_MW_CACHE = "/SMW/MW_CACHE/";
-	static public String M_MW_PIPELINE = "/SMW/MW_API/";
-	static public String M_MW_ZIPTMP = "/SMW/MW_ZIP/";
+	static public String M_MWB_CONVERTED = "/MWB/CONVERTED/";
+	static public String M_MWB_DOWNLOADED = "/MWB/DOWNLOADED/";
+	static public String M_MWB_INDEXES = "/MWB/INDEXES/";
+	static public String M_MWB_CACHE = "/MWB/MW_CACHE/";
+	static public String M_MWB_TEMP = "/MWB/MW_TMP/";
+
 	static public String M_STUDIES = "studies.tsv";
 	static public String M_ANALYSIS = "analysis.tsv";
 	static public String M_METABOLITES = "metabolites.tsv";

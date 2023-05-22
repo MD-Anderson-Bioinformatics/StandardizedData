@@ -3,16 +3,77 @@
 	<head>
 		<title>MDA Standardized Data Metabolomics Workbench Tool</title>
 		<meta charset="UTF-8">
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script type="text/javascript">
+			/* Google Analytics start */
+			// based on https://rankmath.com/blog/google-analytics-gdpr/
+			const cyrb53 = function(str, seed = 0)
+			{
+				let h1 = 0xdeadbeef ^ seed,
+					h2 = 0x41c6ce57 ^ seed;
+				for (let i = 0, ch; i < str.length; i++)
+				{
+					ch = str.charCodeAt(i);
+					h1 = Math.imul(h1 ^ ch, 2654435761);
+					h2 = Math.imul(h2 ^ ch, 1597334677);
+				}
+				h1 = Math.imul(h1 ^ h1 >>> 16, 2246822507) ^ Math.imul(h2 ^ h2 >>> 13, 3266489909);
+				h2 = Math.imul(h2 ^ h2 >>> 16, 2246822507) ^ Math.imul(h1 ^ h1 >>> 13, 3266489909);
+				return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+			};
+
+			const getNavigatorId = function() 
+			{
+				let notAvailable = "unknown";
+				let ua = navigator.userAgent || notAvailable;
+				let lang = window.navigator.language || window.navigator.userLanguage || window.navigator.browserLanguage || window.navigator.systemLanguage || not_available;
+				let colors = window.screen.colorDepth || notAvailable;
+				let memKey = window.navigator.deviceMemory || notAvailable;
+				let pixels = window.devicePixelRatio || notAvailable;
+				let res = [window.screen.width, window.screen.height].sort().reverse().join("x");
+				return ua + ";" + lang + ";" + colors + ";" + memKey + ";" + pixels + ";" + res;
+			};
+
+			let validityInterval = Math.round (new Date() / 1000 / 3600 / 24 / 7);
+			let clientIDSource = window.location.host + ";" + getNavigatorId() + ";" + validityInterval;
+
+			window.clientIDHashed = cyrb53(clientIDSource).toString(16);
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			ga('create', 'UA-33425717-3', 
+			{
+				'storage': 'none',
+				'clientId': clientIDHashed
+			});
+			ga('set', 'anonymizeIp', true);
+			ga('send', 'pageview');
+			/* Google Analytics end */
+
+			function sendGAEvent(theEvent, theCategory, theLabel)
+			{
+				/* Google Analytics start */
+				ga('send', 
+				{
+					hitType: 'event',
+					eventCategory: theEvent,
+					eventAction: theCategory,
+					eventLabel: theLabel
+				});
+				/* Google Analytics end */
+			};
+		</script>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-		<link href="lib/DataTables/DataTables-1.10.20/css/jquery.dataTables.min.css?v=BEA_VERSION_TIMESTAMP" rel="stylesheet" type="text/css">
-		<link href="lib/jquery-ui-1.12.1/jquery-ui.min.css?v=BEA_VERSION_TIMESTAMP" rel="stylesheet" type="text/css">
+		<link href="lib/DataTables/DataTables-1.13.4/css/jquery.dataTables.min.css?v=BEA_VERSION_TIMESTAMP" rel="stylesheet" type="text/css">
+		<link href="lib/jquery-ui-1.13.2/jquery-ui.min.css?v=BEA_VERSION_TIMESTAMP" rel="stylesheet" type="text/css">
 		<link href="StdMW.css?v=BEA_VERSION_TIMESTAMP" rel="stylesheet" type="text/css">
 
 		<script src="lib/knockout-3.5.1.js?v=BEA_VERSION_TIMESTAMP" type="text/javascript" charset="utf-8"></script>
 		<script src="lib/jquery-3.5.0.min.js?v=BEA_VERSION_TIMESTAMP" type="text/javascript" charset="utf-8"></script>
-		<script src="lib/jquery-ui-1.12.1/jquery-ui.min.js?v=BEA_VERSION_TIMESTAMP" type="text/javascript" charset="utf-8"></script>
-		<script src="lib/DataTables/DataTables-1.10.20/js/jquery.dataTables.min.js?v=BEA_VERSION_TIMESTAMP" type="text/javascript" charset="utf-8"></script>
+		<script src="lib/jquery-ui-1.13.2/jquery-ui.min.js?v=BEA_VERSION_TIMESTAMP" type="text/javascript" charset="utf-8"></script>
+		<script src="lib/DataTables/DataTables-1.13.4/js/jquery.dataTables.min.js?v=BEA_VERSION_TIMESTAMP" type="text/javascript" charset="utf-8"></script>
 
 		<script type="text/javascript">
 			/* global ko */
@@ -39,13 +100,14 @@
 			//// download zip conversions
 			////////////////////////////////////////////////////////////////
 			var downloadInterval = null;
-			checkStatusAndDownload = function(theJobId, theAnalysisHash, theStudyHash)
+			checkStatusAndDownload = function(theJobId, theAnalysisHash, theStudyHash, theHumanId)
 			{
 				// if status != pending, then download
 				console.log("checkStatusAndDownload");
 				console.log("theJobId=" + theJobId);
 				console.log("theAnalysisHash=" + theAnalysisHash);
 				console.log("theStudyHash=" + theStudyHash);
+				console.log("theHumanId=" + theHumanId);
 				$.ajax(
 						{
 							type: "GET",
@@ -73,6 +135,7 @@
 									clearInterval(downloadInterval);
 									console.log("theAnalysisHash=" + theAnalysisHash);
 									console.log("theStudyHash=" + theStudyHash);
+									sendGAEvent("action", "smw-download-data", theHumanId);
 									window.location.href = 'zipdl?analysis_hash=' + theAnalysisHash + '&study_hash=' + theStudyHash;
 									enableInput();
 								}
@@ -88,7 +151,7 @@
 						});
 			};
 
-			downloadZipConversion = function (theAnalysisHash, theStudyHash)
+			downloadZipConversion = function (theAnalysisHash, theStudyHash, theHumanId)
 			{
 				console.log("downloadZipConversion theHash = " + theAnalysisHash);
 				console.log("downloadZipConversion study_hash = " + theStudyHash);
@@ -117,7 +180,7 @@
 							{
 								console.log("zipc :" + theString);
 								// check every 30 seconds
-								downloadInterval = setInterval(function() {checkStatusAndDownload(theString, theAnalysisHash, theStudyHash)}, 30000);
+								downloadInterval = setInterval(function() {checkStatusAndDownload(theString, theAnalysisHash, theStudyHash, theHumanId)}, 30000);
 							},
 							error: function (jqXHR, textStatus, errorThrown)
 							{
@@ -129,46 +192,14 @@
 			};
 
 			////////////////////////////////////////////////////////////////
-			//// download analyses data
-			////////////////////////////////////////////////////////////////
-			downloadAnalysisDataDC = function (theAnalysisHash, theStudyHash)
-			{
-				console.log("downloadAnalysisDataDC theHash = " + theAnalysisHash);
-				console.log("downloadAnalysisDataDC study_hash = " + theStudyHash);
-				window.location.href = 'addc?hash=' + theAnalysisHash + '&study_hash=' + theStudyHash;
-			};
-
-			downloadAnalysisDataMSC = function (theAnalysisHash, theStudyHash)
-			{
-				console.log("downloadAnalysisDataMSC theHash = " + theAnalysisHash);
-				console.log("downloadAnalysisDataMSC study_hash = " + theStudyHash);
-				window.location.href = 'admsc?hash=' + theAnalysisHash + '&study_hash=' + theStudyHash;
-			};
-
-			downloadAnalysisDataRaw = function (theAnalysisHash, theStudyHash)
-			{
-				console.log("downloadAnalysisDataRaw theHash = " + theAnalysisHash);
-				console.log("downloadAnalysisDataRaw study_hash = " + theStudyHash);
-				window.location.href = 'adraw?hash=' + theAnalysisHash + '&study_hash=' + theStudyHash;
-			};
-
-			////////////////////////////////////////////////////////////////
 			//// downloadMetaboliteMap
 			////////////////////////////////////////////////////////////////
-			downloadMetaboliteMap = function (theAnalysisHash, theStudyHash)
+			downloadMetaboliteMap = function (theAnalysisHash, theStudyHash, theHumanId)
 			{
 				console.log("downloadMetaboliteMap theHash = " + theAnalysisHash);
 				console.log("downloadMetaboliteMap study_hash = " + theStudyHash);
+				sendGAEvent("action", "smw-download-metabolite", theHumanId);
 				window.location.href = 'mtbltmap?hash=' + theAnalysisHash + '&study_hash=' + theStudyHash;
-			};
-
-			////////////////////////////////////////////////////////////////
-			//// downloadBatches
-			////////////////////////////////////////////////////////////////
-			downloadBatches = function (theAnalysisHash, theStudyHash)
-			{
-				console.log("downloadBatches theHash = " + theStudyHash);
-				window.location.href = 'factors?hash=' + theStudyHash;
 			};
 
 			// this makes sure that nothing gets called until page and required JS files are loaded
@@ -235,12 +266,13 @@
 												{
 													let analysisHash = row.analysis.hash;
 													let studyHash = row.study.hash;
+													let humanid = "Study:" + row.analysis.study_id + " -||- Analysis: " + row.analysis.analysis_id;
 													let metaboliteMapButton = "&nbsp;No RefMet Mapping&nbsp;";
 													if (row.refmet_count>0)
 													{
-														metaboliteMapButton = "<button class='buttons' style='font-size: x-small !important;' onclick='downloadMetaboliteMap(\"" + analysisHash + "\", \"" + studyHash + "\");'>Metabolites</button>";
+														metaboliteMapButton = "<button class='buttons' style='font-size: x-small !important;' onclick='downloadMetaboliteMap(\"" + analysisHash + "\", \"" + studyHash + "\", \"" + humanid + "\");'>Metabolites</button>";
 													}
-													result = "<button class='buttons' style='font-size: x-small !important;' onclick='downloadZipConversion(\"" + analysisHash + "\", \"" + studyHash + "\");'>Download Zip Conversion</button>\r" +
+													result = "<button class='buttons' style='font-size: x-small !important;' onclick='downloadZipConversion(\"" + analysisHash + "\", \"" + studyHash + "\", \"" + humanid + "\");'>Download Zip Conversion</button>\r" +
 															metaboliteMapButton + "\r" +
 															"<img width='16' height='16' src='images/tooltip.png' title='Data download detailsdescribed under the main hamburger menu. Downloads are single threaded on the server so may be delayed.'></img>";
 												}

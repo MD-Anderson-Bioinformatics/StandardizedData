@@ -1,4 +1,4 @@
-// Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -12,14 +12,8 @@
 package edu.mda.bcb.stdmw.servlets;
 
 import edu.mda.bcb.stdmw.startup.Load;
-import edu.mda.bcb.stdmw.startup.Scheduled;
-import edu.mda.bcb.stdmwutils.mwdata.Analysis;
+import edu.mda.bcb.stdmw.utils.ScanCheck;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
-import edu.mda.bcb.stdmwutils.utils.AnalysisUtil;
-import edu.mda.bcb.stdmwutils.utils.DownloadConvertSingle;
-import edu.mda.bcb.stdmwutils.utils.MetaboliteUtil;
-import edu.mda.bcb.stdmwutils.utils.OtherIdsUtil;
-import edu.mda.bcb.stdmwutils.utils.RefMetUtil;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.servlet.ServletException;
@@ -52,8 +46,10 @@ public class ZCStatus extends HttpServlet
 	{
 		try
 		{
+			ScanCheck.checkForSecurity(request);
 			log("Servlet ZCStatus " + MWUrls.M_VERSION);
 			String strId = request.getParameter("job");
+			ScanCheck.checkForMetaCharacters(strId);
 			log("Servlet ZCStatus strId=" + strId);
 			long id = Long.parseLong(strId);
 			log("Servlet ZCStatus id=" + id);

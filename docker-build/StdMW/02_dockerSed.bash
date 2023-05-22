@@ -44,6 +44,8 @@ OUTSIDE_CONFIGPATH=${8}
 IMAGE_URL=${9}
 # path for making ZIPs
 ZIPTMPPATH=${10}
+# group id, such as 2002
+GROUP_ID=${11}
 
 # if SUBNET is not equal to 0, then also remove the #SUBNET comments so the IPAM gets used
 IPAM_COMMENT=#SUBNET
@@ -57,6 +59,7 @@ echo "create Dockerfile from Dockerfile_template"
 rm -f ${STD_DIR}/Dockerfile
 sed -e "s|<RELEASE_VERSION>|SMW_${RELEASE}|g" \
     -e "s|<USERID>|${USER_ID}|g" \
+    -e "s|<GROUPID>|${GROUP_ID}|g" \
     -e "s|<LOG_DIR>|${OUTSIDE_LOGPATH}|g" \
     -e "s|<START_SCRIPT>|${START_SCRIPT}|g" \
     -e "s|<STOP_SCRIPT>|${STOP_SCRIPT}|g" \
@@ -76,7 +79,7 @@ sed -e "s|<OUTSIDE_PORT>|${OUTSIDE_PORT}|g" \
     -e "s|<ZIPTMPPATH>|${ZIPTMPPATH}|g" \
     ${STD_DIR}/docker-compose_template.yml > ${STD_DIR}/docker-compose.yml
 
-# then build with docker-compose -f docker-compose.yml build --force-rm --no-cache
+# then build with docker compose -f docker-compose.yml build --force-rm --no-cache
 
 echo "FINISH 02_dockerSedStdMW"
 

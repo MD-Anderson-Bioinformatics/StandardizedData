@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+ *  Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
  *  
  *  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
  *  
@@ -33,7 +33,8 @@ public class TestDownload
 			StdMwDownload.printLn("StdMwDownload Starting");
 			StdMwDownload.printLn(getVersion());
 			File baseDir = new File("");
-			String analysisId = "AN000025";
+			//String analysisId = "AN000025";
+			String analysisId = "AN000001";
 			String jobId = "NANANANANA";
 			MWStack.downloadDataset(baseDir, analysisId, jobId);
 			StdMwDownload.printLn("StdMwDownload Complete");

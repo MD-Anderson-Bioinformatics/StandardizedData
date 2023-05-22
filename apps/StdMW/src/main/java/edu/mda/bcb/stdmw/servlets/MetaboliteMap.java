@@ -1,4 +1,4 @@
-// Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -12,6 +12,7 @@
 package edu.mda.bcb.stdmw.servlets;
 
 import edu.mda.bcb.stdmw.startup.Scheduled;
+import edu.mda.bcb.stdmw.utils.ScanCheck;
 import edu.mda.bcb.stdmwutils.mwdata.Analysis;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import edu.mda.bcb.stdmwutils.utils.AnalysisUtil;
@@ -52,6 +53,7 @@ public class MetaboliteMap extends HttpServlet
 	{
 		try
 		{
+			ScanCheck.checkForSecurity(request);
 			log("Servlet MetaboliteMap " + MWUrls.M_VERSION);
 			//SummaryUtil summaryUtil = Scheduled.getSummary();
 			AnalysisUtil analysisUtil = Scheduled.getAnalysis();
@@ -59,7 +61,9 @@ public class MetaboliteMap extends HttpServlet
 			RefMetUtil refmetUtil = Scheduled.getRefmetUtil();
 			OtherIdsUtil otherIdsUtil = Scheduled.getOtherIdsUtil();
 			String study_hash = request.getParameter("study_hash");
+			ScanCheck.checkForMetaCharacters(study_hash);
 			String hash = request.getParameter("hash");
+			ScanCheck.checkForMetaCharacters(hash);
 			Analysis analysis = analysisUtil.getAnalysis(hash);
 			log("Servlet MetaboliteMap hash = " + hash);
 			if (null != analysis)

@@ -1,4 +1,4 @@
-// Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -18,11 +18,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 
 /**
  *
@@ -31,34 +33,59 @@ import org.apache.commons.io.FileUtils;
 public class ZipData
 {
 
-	static public File[] zip(File theDir, File theZipFile) throws FileNotFoundException, IOException
+	static public File[] zip(File theDir, File theZipFile, boolean theRemovePathsFlag) throws FileNotFoundException, IOException
 	{
 		// first collect contents to add (to prevent ZIP being self-referential
-		File[] dirList = theDir.listFiles();
+		File parent = theDir.getParentFile().getParentFile();
+		Collection<File> cf = FileUtils.listFilesAndDirs(parent, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
+		cf.remove(parent);
+		File[] dirList = cf.toArray(File[]::new);
 		// then create ZIP
-		FileOutputStream fos = new FileOutputStream(theZipFile);
-		BufferedOutputStream bos = new BufferedOutputStream(fos);
-		ZipOutputStream zos = new ZipOutputStream(bos);
-		try
+		try (ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(theZipFile))))
 		{
 			byte[] buffer = new byte[1024];
 			for (File myFile : dirList)
 			{
-				// not available on BufferedOutputStream
-				zos.putNextEntry(new ZipEntry(myFile.getName()));
-				try (FileInputStream fis = new FileInputStream(myFile))
+				if (myFile.isFile())
 				{
-					for (int bytesRead; (bytesRead = fis.read(buffer)) >= 0;)
+					String zipName = myFile.getAbsolutePath();
+					if (theRemovePathsFlag)
 					{
-						zos.write(buffer, 0, bytesRead);
+						zipName = myFile.getName();
+					}
+					else
+					{
+						zipName = zipName.replace(parent.getAbsolutePath(), "");
+					}
+					// remove leading slash
+					zipName = zipName.substring(1);
+					zos.putNextEntry(new ZipEntry(zipName));
+					try (FileInputStream fis = new FileInputStream(myFile))
+					{
+						for (int bytesRead; (bytesRead = fis.read(buffer)) >= 0;)
+						{
+							zos.write(buffer, 0, bytesRead);
+						}
+					}
+					finally
+					{
+						zos.closeEntry();
 					}
 				}
-				zos.closeEntry();
+				else
+				{
+					String zipName = myFile.getAbsolutePath();
+					zipName = zipName.replace(parent.getAbsolutePath(), "");
+					// remove leading slash
+					zipName = zipName.substring(1);
+					if (!zipName.endsWith("/"))
+					{
+						zipName = zipName + "/";
+					}
+					zos.putNextEntry(new ZipEntry(zipName));
+					zos.closeEntry();
+				}
 			}
-		}
-		finally
-		{
-			zos.close();
 		}
 		return dirList;
 	}
@@ -66,8 +93,7 @@ public class ZipData
 	static public TreeSet<String> getListOfFiles(File theZipFile) throws FileNotFoundException, IOException
 	{
 		TreeSet<String> myFiles = new TreeSet<>();
-		ZipInputStream zis = new ZipInputStream(new FileInputStream(theZipFile));
-		try
+		try(ZipInputStream zis = new ZipInputStream(new FileInputStream(theZipFile)))
 		{
 			ZipEntry zipEntry = zis.getNextEntry();
 			while (zipEntry != null)
@@ -75,11 +101,7 @@ public class ZipData
 				myFiles.add(zipEntry.getName());
 				zipEntry = zis.getNextEntry();
 			}
-		}
-		finally
-		{
 			zis.closeEntry();
-			zis.close();
 		}
 		return myFiles;
 	}
@@ -88,8 +110,7 @@ public class ZipData
 	{
 		boolean extract = false;
 		StdMwDownload.printLn("Copy '" + theFilename + "' from '" + theZipArchive.getAbsolutePath() + "' to '" + theDestFile.getAbsolutePath());
-		ZipInputStream zis = new ZipInputStream(new FileInputStream(theZipArchive));
-		try
+		try(ZipInputStream zis = new ZipInputStream(new FileInputStream(theZipArchive)))
 		{
 			ZipEntry ze = zis.getNextEntry();
 			while ((false==extract)&&(null!=ze))
@@ -105,10 +126,6 @@ public class ZipData
 					ze = zis.getNextEntry();
 				}
 			}
-		}
-		finally
-		{
-			zis.close();
 		}
 		return extract;
 	}

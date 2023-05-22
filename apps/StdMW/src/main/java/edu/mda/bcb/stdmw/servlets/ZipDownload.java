@@ -1,4 +1,4 @@
-// Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -12,6 +12,7 @@
 package edu.mda.bcb.stdmw.servlets;
 
 import com.google.common.io.Files;
+import edu.mda.bcb.stdmw.utils.ScanCheck;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -49,32 +51,44 @@ public class ZipDownload extends HttpServlet
 	{
 		try
 		{
+			ScanCheck.checkForSecurity(request);
 			log("Servlet ZipDownload " + MWUrls.M_VERSION);
 			String analysis_hash = request.getParameter("analysis_hash");
+			ScanCheck.checkForMetaCharacters(analysis_hash);
 			String study_hash = request.getParameter("study_hash");
+			ScanCheck.checkForMetaCharacters(study_hash);
 			if ((null!=analysis_hash)&&(null!=study_hash))
 			{
-				File dataDir = new File(MWUrls.M_MW_ZIPTMP);
+				File dataDir = new File(MWUrls.M_MWB_TEMP);
 				checkPathExistsSafely(dataDir, study_hash);
 				File subDir = new File(dataDir, study_hash);
 				checkPathExistsSafely(subDir, analysis_hash);
 				File lastDir = new File(subDir, analysis_hash);
-				File zipFile = new File(lastDir, (analysis_hash + ".zip"));
-				if (zipFile.exists())
+				File [] cf = FileUtils.listFiles(lastDir, new String[] { "zip" }, false).toArray(File[]::new);
+				if (cf.length>0)
 				{
-					response.setContentType("application/zip;charset=UTF-8");
-					response.setHeader("Content-Disposition", "attachment; filename=\"" + zipFile.getName() + "\"");
-					try (OutputStream out = response.getOutputStream())
+					File zipFile = cf[0];
+					log("ZipDownload zipFile = " + zipFile.getAbsolutePath());
+					if (zipFile.exists())
 					{
-						Files.copy(zipFile, out);
-						out.flush();
+						response.setContentType("application/zip;charset=UTF-8");
+						response.setHeader("Content-Disposition", "attachment; filename=\"" + zipFile.getName() + "\"");
+						try (OutputStream out = response.getOutputStream())
+						{
+							Files.copy(zipFile, out);
+							out.flush();
+						}
+						// do not delete. Once a day, anything over an hour old is deleted
+						//zipFile.delete();
 					}
-					// do not delete. Once a day, anything over an hour old is deleted
-					//zipFile.delete();
+					else
+					{
+						throw new Exception("File not found 1" + zipFile.getAbsolutePath());
+					}
 				}
 				else
 				{
-					throw new Exception("File not found");
+					throw new Exception("File not found 2");
 				}
 			}
 			else

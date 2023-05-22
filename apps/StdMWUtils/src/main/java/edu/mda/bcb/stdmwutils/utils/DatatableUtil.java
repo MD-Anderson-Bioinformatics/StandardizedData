@@ -1,4 +1,4 @@
-// Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -74,44 +74,52 @@ public class DatatableUtil
 				columns.remove("Samples");
 				// remove class from list of headers
 				columns.remove("Class");
-				// row headers are first value from each row entry
-				// samples
-				ArrayList<String> rows = new ArrayList<>();
-				for (CSVRecord csvRecord : memlist)
+				if (columns.size() > 0)
 				{
-					rows.add(csvRecord.get("Samples"));
-				}
-				// setup table
-				Table<String, String, String> dataTable = ArrayTable.create(rows, columns);
-				for (CSVRecord csvRecord : memlist)
-				{
-					String myRow = csvRecord.get(0);
-					for (String col : columns)
+					// row headers are first value from each row entry
+					// samples
+					ArrayList<String> rows = new ArrayList<>();
+					for (CSVRecord csvRecord : memlist)
 					{
-						dataTable.put(myRow, col, csvRecord.get(col));
+						rows.add(csvRecord.get("Samples"));
 					}
-				}
-				dataTable = Tables.transpose(dataTable);
-				// write headers to theOut
-				for(String hdr : dataTable.columnKeySet())
-				{
-					theOut.write(("\t"+hdr).getBytes());
-				}
-				theOut.write("\n".getBytes());
-				theOut.flush();
-				// write each row to theOut
-				for(String row : dataTable.rowKeySet())
-				{
-					theOut.write(row.getBytes());
-					for(String col : dataTable.columnKeySet())
+					// setup table
+					Table<String, String, String> dataTable = ArrayTable.create(rows, columns);
+					for (CSVRecord csvRecord : memlist)
 					{
-						theOut.write("\t".getBytes());
-						theOut.write(dataTable.get(row, col).getBytes());
+						String myRow = csvRecord.get(0);
+						for (String col : columns)
+						{
+							dataTable.put(myRow, col, csvRecord.get(col));
+						}
+					}
+					dataTable = Tables.transpose(dataTable);
+					// write headers to theOut
+					for(String hdr : dataTable.columnKeySet())
+					{
+						theOut.write(("\t"+hdr).getBytes());
 					}
 					theOut.write("\n".getBytes());
 					theOut.flush();
+					// write each row to theOut
+					for(String row : dataTable.rowKeySet())
+					{
+						theOut.write(row.getBytes());
+						for(String col : dataTable.columnKeySet())
+						{
+							theOut.write("\t".getBytes());
+							theOut.write(dataTable.get(row, col).getBytes());
+						}
+						theOut.write("\n".getBytes());
+						theOut.flush();
+					}
+					success = url;
 				}
-				success = url;
+				else
+				{
+					success = null;
+					StdMwDownload.printWarn("getDatatableDC no columns in theAnalysisId=" + theAnalysisId);
+				}
 			}
 			catch(Exception exp)
 			{
@@ -143,49 +151,58 @@ public class DatatableUtil
 				{
 					featureNames.add(hdr);
 				}
+				StdMwDownload.printLn("Number of headers = " + featureNames.size());
 				// remove sample from list of features
 				featureNames.remove("Samples");
 				// remove class from list of features
 				featureNames.remove("Class");
-				// sample id and sample class are first two values from each row entry
-				// sample+class
-				ArrayList<String> sampleLabels = new ArrayList<>();
-				for (CSVRecord csvRecord : memlist)
+				if (featureNames.size()>0)
 				{
-					sampleLabels.add(csvRecord.get("Samples") + "-" + csvRecord.get("Class"));
-				}
-				// ArrayTable.create(row-index-list-features, column-index-list-samples
-				Table<String, String, String> dataTable = ArrayTable.create(featureNames, sampleLabels);
-				for (CSVRecord csvRecord : memlist)
-				{
-					String colIndex = csvRecord.get("Samples") + "-" + csvRecord.get("Class");
-					for (String rowIndex : featureNames)
+					// sample id and sample class are first two values from each row entry
+					// sample+class
+					ArrayList<String> sampleLabels = new ArrayList<>();
+					for (CSVRecord csvRecord : memlist)
 					{
-						dataTable.put(rowIndex, colIndex, csvRecord.get(rowIndex));
+						sampleLabels.add(csvRecord.get("Samples") + "-" + csvRecord.get("Class"));
 					}
-				}
-				dataTable = Tables.transpose(dataTable);
-				// write headers to theOut
-				for(String hdr : dataTable.columnKeySet())
-				{
-					theOut.write(("\t"+hdr).getBytes());
-				}
-				theOut.write("\n".getBytes());
-				theOut.flush();
-				// write each row to theOut
-				// ArrayTable.create(row-index-list-features, column-index-list-samples
-				for(String featureId : dataTable.rowKeySet())
-				{
-					theOut.write(featureId.getBytes());
-					for(String sampleId : dataTable.columnKeySet())
+					// ArrayTable.create(row-index-list-features, column-index-list-samples
+					Table<String, String, String> dataTable = ArrayTable.create(featureNames, sampleLabels);
+					for (CSVRecord csvRecord : memlist)
 					{
-						theOut.write("\t".getBytes());
-						theOut.write(dataTable.get(featureId, sampleId).getBytes());
+						String colIndex = csvRecord.get("Samples") + "-" + csvRecord.get("Class");
+						for (String rowIndex : featureNames)
+						{
+							dataTable.put(rowIndex, colIndex, csvRecord.get(rowIndex));
+						}
+					}
+					dataTable = Tables.transpose(dataTable);
+					// write headers to theOut
+					for(String hdr : dataTable.columnKeySet())
+					{
+						theOut.write(("\t"+hdr).getBytes());
 					}
 					theOut.write("\n".getBytes());
 					theOut.flush();
+					// write each row to theOut
+					// ArrayTable.create(row-index-list-features, column-index-list-samples
+					for(String featureId : dataTable.rowKeySet())
+					{
+						theOut.write(featureId.getBytes());
+						for(String sampleId : dataTable.columnKeySet())
+						{
+							theOut.write("\t".getBytes());
+							theOut.write(dataTable.get(featureId, sampleId).getBytes());
+						}
+						theOut.write("\n".getBytes());
+						theOut.flush();
+					}
+					success = url;
 				}
-				success = url;
+				else
+				{
+					StdMwDownload.printWarn("getDatatableMSC was unable to get feature list for theAnalysisId=" + theAnalysisId);
+					success = null;
+				}
 			}
 			catch(Exception exp)
 			{

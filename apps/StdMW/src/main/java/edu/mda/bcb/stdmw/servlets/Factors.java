@@ -1,4 +1,4 @@
-// Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -12,6 +12,7 @@
 package edu.mda.bcb.stdmw.servlets;
 
 import edu.mda.bcb.stdmw.startup.Scheduled;
+import edu.mda.bcb.stdmw.utils.ScanCheck;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import edu.mda.bcb.stdmwutils.mwdata.Summary;
 import edu.mda.bcb.stdmwutils.utils.FactorUtil;
@@ -49,9 +50,11 @@ public class Factors extends HttpServlet
 	{
 		try
 		{
+			ScanCheck.checkForSecurity(request);
 			log("Servlet Factors " + MWUrls.M_VERSION);
 			SummaryUtil summaryUtil = Scheduled.getSummary();
 			String hash = request.getParameter("hash");
+			ScanCheck.checkForMetaCharacters(hash);
 			log("Servlet Factors hash = " + hash);
 			Summary summary = summaryUtil.get(hash);
 			if (null!=summary)

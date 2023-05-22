@@ -1,4 +1,4 @@
-// Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -65,7 +65,7 @@ public class GDCIdentifiers
 		EnsemblGeneMap.M_VALID_CHROMOSOMES.add("20");
 		EnsemblGeneMap.M_VALID_CHROMOSOMES.add("21");
 		EnsemblGeneMap.M_VALID_CHROMOSOMES.add("22");
-		String inputGtf = new File(theDataInDir, "gencode.v22.annotation.gtf.zip").getAbsolutePath();
+		String inputGtf = new File(theDataInDir, "gencode.v36.annotation.gtf.zip").getAbsolutePath();
 		String outputScore = new File(theDataOutDir, "GeneInfo-GRCh38.txt").getAbsolutePath();
 		String outputMap = new File(theDataOutDir, "GRCh38map.tsv").getAbsolutePath();
 		String outputExons = new File(theDataOutDir, "GRCh38exons.tsv").getAbsolutePath();

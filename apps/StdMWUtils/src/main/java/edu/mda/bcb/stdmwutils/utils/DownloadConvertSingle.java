@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+ *  Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
  *  
  *  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
  *  
@@ -62,25 +62,29 @@ public class DownloadConvertSingle
 	public String downloadLocation()
 	{
 		// Do not use path, since it is exposed in the web app
-		//String loc = mAnalysis.study_hash + "/" + mAnalysis.hash + "/" + mAnalysis.hash + ".zip";
 		return mAnalysis.hash;
 	}
 	
 	public String dAndC() throws IOException, NoSuchAlgorithmException, MalformedURLException, StdMwException, Exception
 	{
-		File zip = new File(getZipDir(true), mAnalysis.hash + ".zip");
+		File zip = new File(getZipDir(true), "MWB_" + mAnalysis.study_id + "_" + mAnalysis.analysis_id + ".zip");
+		StdMwDownload.printLn("dAndC zip=" + zip);
 		if (!zip.exists())
 		{
+			StdMwDownload.printLn("dAndC download it " + zip);
 			downloadDataOptions();
-			convertDataOptions();
+			StdMwDownload.printLn("dAndC convert it " + zip);
+			convertDataOptions(); 
+			StdMwDownload.printLn("dAndC cleanup " + zip);
 			cleanupDataOptions();
 		}
+		StdMwDownload.printLn("dAndC zip exists -- get download location");
 		return downloadLocation();
 	}
 	
 	protected File getZipDir(boolean theMkFlag)
 	{
-		File dataDir = new File(MWUrls.M_MW_ZIPTMP);
+		File dataDir = new File(MWUrls.M_MWB_TEMP);
 		if (theMkFlag)
 		{
 			dataDir.mkdir();
@@ -228,7 +232,7 @@ public class DownloadConvertSingle
 		else
 		{
 			// copy to matrix data and download time
-			FileUtils.copyFile(useMe, new File(dldDir, "matrix_data.tsv"));
+			FileUtils.copyFile(useMe, new File(dldDir, "matrix.tsv"));
 			FileUtils.copyFile(copyMe, new File(dldDir, "download.tsv"));
 			// create batches.tsv
 			// TODO: true==merge means sample and class were merged
@@ -242,7 +246,7 @@ public class DownloadConvertSingle
 				File batchesFile = new File(dldDir, "batches.tsv");
 				try
 				{
-					convertBatchOptions(batchFile, batchesFile, new File(dldDir, "matrix_data.tsv"), "Samples", "Sample");
+					convertBatchOptions(batchFile, batchesFile, new File(dldDir, "matrix.tsv"), "Samples", "Sample");
 				}
 				catch(Exception exp)
 				{
@@ -254,8 +258,8 @@ public class DownloadConvertSingle
 					File rowColTypeFile = new File(dldDir, "row_col_types.tsv");
 					File ngchmLinkMapFile = new File(dldDir, "ngchm_link_map.tsv");
 					File metabolitesFile = new File(dldDir, "metabolites.tsv");
-					File metaboliteMapFile = new File(MWUrls.M_MW_CACHE, "metabolite_map.tsv");
-					convertLinkOuts(rowColTypeFile, ngchmLinkMapFile, new File(dldDir, "matrix_data.tsv"), metabolitesFile, metaboliteMapFile);
+					File metaboliteMapFile = new File(MWUrls.M_MWB_CACHE, "metabolite_map.tsv");
+					convertLinkOuts(rowColTypeFile, ngchmLinkMapFile, new File(dldDir, "matrix.tsv"), metabolitesFile, metaboliteMapFile);
 				}
 				catch(Exception exp)
 				{
@@ -400,6 +404,7 @@ public class DownloadConvertSingle
 	protected File cleanupDataOptions() throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
 		File dldDir = getZipDir(false);
+		StdMwDownload.printLn("cleanupDataOptions dldDir=" + dldDir);
 		// download all versions of data (Raw, Drop Class, Merge Sample-Class)
 		File rawFile = new File(dldDir, "raw_data.tsv");
 		if (rawFile.exists())
@@ -438,8 +443,8 @@ public class DownloadConvertSingle
 		//	batchFile.delete();
 		//}
 		// zip directory
-		File zipFile = new File(dldDir, (mAnalysis.hash + ".zip"));
-		File [] files = ZipData.zip(dldDir, zipFile);
+		File zipFile = new File(dldDir, ("MWB_" + mAnalysis.study_id + "_" + mAnalysis.analysis_id + ".zip"));
+		File [] files = ZipData.zip(dldDir, zipFile, true);
 		for (File myF : files)
 		{
 			if (myF.exists())

@@ -1,4 +1,4 @@
-// Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -61,22 +61,28 @@ public class HG38Maps
 		TreeSet<String> outputFiles = new TreeSet<>();
 		// Genes - map
 		HG38GeneMap hg38geneMap = new HG38GeneMap(mValidChromosomes, new File(theDataOutDir, "HG38_Genes.tsv").getAbsolutePath());
-		outputFiles.add(hg38geneMap.run(new File(theDataInDir, "gencode.v22.annotation.gtf.zip").getAbsolutePath()));
+		outputFiles.add(hg38geneMap.run(new File(theDataInDir, "gencode.v36.annotation.gtf.zip").getAbsolutePath()));
 		// Transcripts - map
 		HG38TranscriptMap hg38transcriptMap = new HG38TranscriptMap(mValidChromosomes, new File(theDataOutDir, "HG38_Transcripts.tsv").getAbsolutePath());
-		outputFiles.add(hg38transcriptMap.run(new File(theDataInDir, "gencode.v22.annotation.gtf.zip").getAbsolutePath()));
+		outputFiles.add(hg38transcriptMap.run(new File(theDataInDir, "gencode.v36.annotation.gtf.zip").getAbsolutePath()));
 		// Exons - map
 		HG38ExonMap hg38ExonMap = new HG38ExonMap(mValidChromosomes, new File(theDataOutDir, "HG38_Exons.tsv").getAbsolutePath());
-		outputFiles.add(hg38ExonMap.run(new File(theDataInDir, "gencode.v22.annotation.gtf.zip").getAbsolutePath()));
+		outputFiles.add(hg38ExonMap.run(new File(theDataInDir, "gencode.v36.annotation.gtf.zip").getAbsolutePath()));
 		// miRNA - map
 		HG38MirMap hg38MirMap = new HG38MirMap(mValidChromosomes, new File(theDataOutDir, "HG38_Mirs.tsv").getAbsolutePath());
 		outputFiles.add(hg38MirMap.run(new File(theDataInDir, "mirna.txt.zip").getAbsolutePath()));
 		outputFiles.add(hg38MirMap.run(new File(theDataInDir, "mirna_mature.txt.zip").getAbsolutePath()));
 		outputFiles.add(hg38MirMap.run(new File(theDataInDir, "mirna_chromosome_build.txt.zip").getAbsolutePath()));
 		outputFiles.add(hg38MirMap.run(new File(theDataInDir, "mirna_pre_mature.txt.zip").getAbsolutePath()));
-		// SNP6 - map		
+		// SNP6 - map
 		HG38Snp6Map hg38snp6map = new HG38Snp6Map(mValidChromosomes, new File(theDataOutDir, "HG38_SNP6.tsv").getAbsolutePath());
 		outputFiles.add(hg38snp6map.run(new File(theDataInDir, "snp6.na35.liftoverhg38.txt.zip").getAbsolutePath()));
+		// SeSAMe Probes
+		HG38SesameMethMap hg38sesameMethMap = new HG38SesameMethMap(mValidChromosomes, new File(theDataOutDir, "HG38_SSM450.tsv").getAbsolutePath());
+		outputFiles.add(hg38sesameMethMap.run(new File(theDataInDir, "HM450.hg38.manifest.gencode.v36.tsv.zip").getAbsolutePath()));
+		hg38sesameMethMap = new HG38SesameMethMap(mValidChromosomes, new File(theDataOutDir, "HG38_SSM27.tsv").getAbsolutePath());
+		outputFiles.add(hg38sesameMethMap.run(new File(theDataInDir, "HM27.hg38.manifest.gencode.v36.tsv.zip").getAbsolutePath()));
+		//
 		return outputFiles;
 	}
 	

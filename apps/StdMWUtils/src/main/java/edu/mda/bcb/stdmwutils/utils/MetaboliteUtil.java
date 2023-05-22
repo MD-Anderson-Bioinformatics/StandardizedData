@@ -1,4 +1,4 @@
-// Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -50,11 +50,19 @@ public class MetaboliteUtil
 	static public MetaboliteUtil updateMetaboliteUtil(String theTimeStamp, AnalysisUtil theAU) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
 		// TODO: check for newest file, and download new and compare to old
-		File outDir = new File(MWUrls.M_MW_CACHE, theTimeStamp);
+		File outDir = new File(MWUrls.M_MWB_CACHE, theTimeStamp);
 		MetaboliteUtil au = new MetaboliteUtil();
-		for (Analysis ana : theAU.getAnalysesAll())
+		File existing = new File(outDir, MWUrls.M_METABOLITES);
+		if (existing.exists())
 		{
-			au.fetchMetabolites(ana.analysis_id);
+			au.readMetabolites(outDir);
+		}
+		else
+		{
+			for (Analysis ana : theAU.getAnalysesAll())
+			{
+				au.fetchMetabolites(ana.analysis_id);
+			}
 		}
 		au.writeMetabolites(outDir);
 		return au;
@@ -62,7 +70,7 @@ public class MetaboliteUtil
 
 	static public MetaboliteUtil readNewestMetaboliteFile() throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
-		File timestampDir = MWUrls.findNewestDir(new File(MWUrls.M_MW_CACHE));
+		File timestampDir = MWUrls.findNewestDir(new File(MWUrls.M_MWB_CACHE));
 		MetaboliteUtil su = new MetaboliteUtil();
 		su.readMetabolites(timestampDir);
 		return su;
@@ -150,13 +158,24 @@ public class MetaboliteUtil
 				bw.newLine();
 				StdMwDownload.printLn("writeMetabolites - iterate Metabolites");
 				TreeSet<Metabolite> fullSet = mDataToSet.getAll();
+				int cnt = 0;
 				for (Metabolite metabolite : fullSet)
 				{
-					System.out.print(".");
+					if (0 == cnt % 1000)
+					{
+						System.out.print(".");
+					}
 					bw.write(metabolite.getRowString());
 					bw.newLine();
 					bw.flush();
+					cnt += 1;
+					if (cnt > 100000)
+					{
+						System.out.println(".");
+						cnt = 0;
+					}
 				}
+				System.out.println(".");
 				StdMwDownload.printLn("writeMetabolites - finished iterating");
 			}
 		}

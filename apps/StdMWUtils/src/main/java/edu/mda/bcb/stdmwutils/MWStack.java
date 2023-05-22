@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+ *  Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
  *  
  *  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
  *  
@@ -13,13 +13,13 @@
  */
 package edu.mda.bcb.stdmwutils;
 
-import edu.mda.bcb.gdc.api.DownloadJsonToString;
 import static edu.mda.bcb.stdmwutils.StdMwDownload.getVersion;
 import edu.mda.bcb.stdmwutils.mwdata.Analysis;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import edu.mda.bcb.stdmwutils.std.ZipData;
 import edu.mda.bcb.stdmwutils.utils.AnalysisUtil;
 import edu.mda.bcb.stdmwutils.utils.DownloadConvertSingle;
+import edu.mda.bcb.stdmwutils.utils.DownloadJsonToString;
 import edu.mda.bcb.stdmwutils.utils.MetaboliteUtil;
 import edu.mda.bcb.stdmwutils.utils.OtherIdsUtil;
 import edu.mda.bcb.stdmwutils.utils.RefMetUtil;
@@ -101,7 +101,7 @@ public class MWStack
 							String theFailureStatus = "NEWJOB_FAILURE";
 							File finalDataDir = new File(new File(basedir, "ZIP-DATA"), "original");
 							finalDataDir.mkdirs();
-							File finalMatrix1 = new File(finalDataDir, "matrix_data.tsv");
+							File finalMatrix1 = new File(finalDataDir, "matrix.tsv");
 							File finalBatchs1 = new File(finalDataDir, "batches.tsv");
 							File finalLinkmp1 = new File(finalDataDir, "ngchm_link_map.tsv");
 							File finalRowcol1 = new File(finalDataDir, "row_col_types.tsv");
@@ -180,7 +180,7 @@ public class MWStack
 			File zipFile = processDirectory(theBaseDir, theJobId);
 			// copy matrix and batch files
 			StdMwDownload.printLn("copy files");
-			ZipData.extractFile(zipFile, "matrix_data.tsv", theFinalMatrix);
+			ZipData.extractFile(zipFile, "matrix.tsv", theFinalMatrix);
 			ZipData.extractFile(zipFile, "batches.tsv", theFinalBatchs);
 			ZipData.extractFile(zipFile, "ngchm_link_map.tsv", theFinalLinkmp);
 			ZipData.extractFile(zipFile, "row_col_types.tsv", theFinalRowcol);
@@ -273,6 +273,7 @@ public class MWStack
 		StdMwDownload.printLn("baseDir ='" + theBaseDir + "'");
 		StdMwDownload.printLn("jobid   ='" + theJobId + "'");
 		String analysisId = null;
+		StdMwDownload.printLn("read analysis id from   ='" + new File(theBaseDir, "dataset.txt") + "'");
 		try (BufferedReader br = java.nio.file.Files.newBufferedReader(new File(theBaseDir, "dataset.txt").toPath(), Charset.availableCharsets().get("UTF-8")))
 		{
 			// Study id
@@ -299,7 +300,7 @@ public class MWStack
 			DownloadConvertSingle dcs = new DownloadConvertSingle(analysis, analysisUtil, refmetUtil, otherIdsUtil, metaUtil);
 			String zip = dcs.dAndC();
 			zip = dcs.mAnalysis.study_hash + "/" + dcs.mAnalysis.hash + "/" + dcs.mAnalysis.hash + ".zip";
-			return new File(MWUrls.M_MW_ZIPTMP, zip);
+			return new File(MWUrls.M_MWB_TEMP, zip);
 		}
 		return null;
 	}

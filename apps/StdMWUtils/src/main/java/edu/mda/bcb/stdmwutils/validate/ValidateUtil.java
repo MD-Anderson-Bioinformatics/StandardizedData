@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+ *  Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
  *  
  *  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
  *  
@@ -163,7 +163,7 @@ public class ValidateUtil
 		// Metabolites.tsv refmet_name and pubchem_id are also a foreign key group to OtherId.tsv name and pubchem_cid.
 		// but not all refmet_names are in the refmet file
 		MetaboliteMapUtil mmu = new MetaboliteMapUtil(mMU, mRU, mOU);
-		File outDir = new File(MWUrls.M_MW_CACHE, theTimestamp);
+		File outDir = new File(MWUrls.M_MWB_CACHE, theTimestamp);
 		File output = new File(outDir, "validate_map.tsv");
 		OpenOption[] options = new OpenOption[] { StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING };
 		try(OutputStream bw = java.nio.file.Files.newOutputStream(output.toPath(), options))

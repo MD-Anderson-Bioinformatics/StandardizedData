@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+ *  Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
  *  
  *  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
  *  
@@ -12,7 +12,7 @@
  */
 package edu.mda.bcb.stdmwutils;
 
-import edu.mda.bcb.gdc.api.indexes.DataIndex;
+import edu.mda.bcb.stdmwutils.indexes.DataIndex;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import edu.mda.bcb.stdmwutils.std.MWAPI;
 import edu.mda.bcb.stdmwutils.utils.AnalysisUtil;
@@ -30,6 +30,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import javax.servlet.ServletContext;
 
 /**
  *
@@ -38,23 +39,26 @@ import java.util.Calendar;
 public class StdMwDownload
 {
 	static private File M_OUTPUT_FILE = null;
+	static private ServletContext M_SERVLET_CONTEXT = null;
 	public static DataIndex M_QUERY_INDEX = null;
 	
 	public static void main(String[] args)
 	{
-		// uses directory specified in MWUrls.M_MW_CACHE = "/SMW/MW_CACHE/";
+		// uses directories specified in MWUrls
+		String myDataVersion = "2023-03-28";
 		try
 		{
+			RefMetUtil.updateRefMetUtil(myDataVersion);
 			StdMwDownload.printLn("StdMwDownload Starting");
 			StdMwDownload.printLn(getVersion());
+			// use this for testing/development
+			//StdMwDownload.printLn("testCacheRead");
+			//testCacheRead(true);
 			// use normal download for normal runs (check this one in)
 			StdMwDownload.printLn("normalCacheDownload");
-			normalCacheDownload();
-			// use test read for new development
-			StdMwDownload.printLn("testCacheRead");
-			testCacheRead(true);
+			normalCacheDownload(myDataVersion);
 			// process analysis data for pipeline
-			M_QUERY_INDEX = new DataIndex(new File(new File(MWUrls.M_MW_PIPELINE, "INDEX"), "index.tsv"));
+			M_QUERY_INDEX = new DataIndex(new File(MWUrls.M_MWB_INDEXES, "mwb_index.tsv"));
 			processCacheForPipeline();
 			StdMwDownload.printLn("StdMwDownload Complete");
 		}
@@ -64,19 +68,18 @@ public class StdMwDownload
 		}
 	}
 
-	static private void normalCacheDownload() throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
+	static private void normalCacheDownload(String theDataVersion) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
 		StdMwDownload.printLn("#############################################################################################");
 		StdMwDownload.printLn("##################################normalCacheDownload########################################");
 		StdMwDownload.printLn("#############################################################################################");
-		String timeStamp = StdMwDownload.getTimestamp();
-		SummaryUtil su = SummaryUtil.updateSummaryUtil(timeStamp);
-		AnalysisUtil au = AnalysisUtil.updateAnalysisUtil(timeStamp, su);
-		MetaboliteUtil mu = MetaboliteUtil.updateMetaboliteUtil(timeStamp, au);
-		RefMetUtil ru = RefMetUtil.updateRefMetUtil(timeStamp);
-		OtherIdsUtil ou = OtherIdsUtil.updateOtherIdsUtil(timeStamp, ru, mu);
+		SummaryUtil su = SummaryUtil.updateSummaryUtil(theDataVersion);
+		AnalysisUtil au = AnalysisUtil.updateAnalysisUtil(theDataVersion, su);
+		MetaboliteUtil mu = MetaboliteUtil.updateMetaboliteUtil(theDataVersion, au);
+		RefMetUtil ru = RefMetUtil.updateRefMetUtil(theDataVersion);
+		OtherIdsUtil ou = OtherIdsUtil.updateOtherIdsUtil(theDataVersion, ru, mu);
 		ValidateUtil vu = new ValidateUtil(mu, ru, ou);
-		vu.validate(timeStamp, au.getRandomIds());
+		vu.validate(theDataVersion, au.getRandomIds());
 	}
 
 	static private void testCacheRead(boolean theAllFlag) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
@@ -90,7 +93,7 @@ public class StdMwDownload
 		RefMetUtil ru = RefMetUtil.readNewestRefMetFile();
 		OtherIdsUtil ou = OtherIdsUtil.readNewestOtherIdsFile();
 		//
-		File timestampDir = MWUrls.findNewestDir(new File(MWUrls.M_MW_CACHE));
+		File timestampDir = MWUrls.findNewestDir(new File(MWUrls.M_MWB_CACHE));
 		ValidateUtil vu = new ValidateUtil(mu, ru, ou);
 		if (theAllFlag)
 		{
@@ -105,14 +108,14 @@ public class StdMwDownload
 	static private void processCacheForPipeline() throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException, Exception
 	{
 		StdMwDownload.printLn("#############################################################################################");
-		StdMwDownload.printLn("####################################testCacheRead############################################");
+		StdMwDownload.printLn("####################################processCacheForPipeline############################################");
 		StdMwDownload.printLn("#############################################################################################");
 		SummaryUtil su = SummaryUtil.readNewestSummaryFile();
 		AnalysisUtil au = AnalysisUtil.readNewestAnalysisFile();
 		MetaboliteUtil mu = MetaboliteUtil.readNewestMetaboliteFile();
 		RefMetUtil ru = RefMetUtil.readNewestRefMetFile();
 		OtherIdsUtil ou = OtherIdsUtil.readNewestOtherIdsFile();
-		File timestampDir = MWUrls.findNewestDir(new File(MWUrls.M_MW_CACHE));
+		File timestampDir = MWUrls.findNewestDir(new File(MWUrls.M_MWB_CACHE));
 		//
 		MWAPI sp = new MWAPI(su, au, mu, ru, ou, timestampDir);
 		sp.processPipeline(2000, timestampDir.getName());
@@ -137,6 +140,18 @@ public class StdMwDownload
 		}
 	}
 
+	static public void setLogContext(ServletContext theContext)
+	{
+		if (null == theContext)
+		{
+			M_SERVLET_CONTEXT = null;
+		}
+		else
+		{
+			M_SERVLET_CONTEXT = theContext;
+		}
+	}
+
 	static public void logIfNotNull(String theLog)
 	{
 		if (null != M_OUTPUT_FILE)
@@ -148,6 +163,18 @@ public class StdMwDownload
 			catch (Exception theExp)
 			{
 				System.err.println("Failed writing to " + M_OUTPUT_FILE.getAbsolutePath());
+				theExp.printStackTrace(System.err);
+			}
+		}
+		if (null != M_SERVLET_CONTEXT)
+		{
+			try
+			{
+				M_SERVLET_CONTEXT.log(theLog);
+			}
+			catch (Exception theExp)
+			{
+				System.err.println("Failed writing to servlet context");
 				theExp.printStackTrace(System.err);
 			}
 		}

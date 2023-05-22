@@ -1,4 +1,4 @@
-// Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -11,6 +11,7 @@
 package edu.mda.bcb.stdmw.startup;
 
 import edu.mda.bcb.stdmw.utils.FIFOQueue;
+import edu.mda.bcb.stdmwutils.StdMwDownload;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import java.io.File;
 import javax.servlet.ServletContextEvent;
@@ -30,6 +31,7 @@ public class Load implements ServletContextListener
 	@Override
 	public void contextInitialized(ServletContextEvent sce)
 	{
+		StdMwDownload.setLogContext(sce.getServletContext());
 		if (null==Load.mQueue)
 		{
 			Load.mQueue = new FIFOQueue();
@@ -38,7 +40,7 @@ public class Load implements ServletContextListener
 		try
 		{
 			// remove ZIPs if present
-			File dataDir = new File(MWUrls.M_MW_ZIPTMP);
+			File dataDir = new File(MWUrls.M_MWB_TEMP);
 			if (dataDir.exists())
 			{
 				File [] del = dataDir.listFiles();
@@ -47,14 +49,17 @@ public class Load implements ServletContextListener
 					FileUtils.deleteQuietly(rm);
 				}
 			}
-			// remove live dir if present
-			File liveDir = new File(MWUrls.M_MW_CACHE, "live");
-			if (liveDir.exists())
-			{
-				FileUtils.deleteQuietly(liveDir);
-			}
-			// hack to give time for delete to occur
-			new File(MWUrls.M_MW_CACHE).list();
+//			// remove live dir if present
+//			File liveDir = new File(MWUrls.M_MW_CACHE, "live");
+//			if (liveDir.exists())
+//			{
+//				FileUtils.deleteQuietly(liveDir);
+//			}
+//			while(liveDir.exists())
+//			{
+//				// hack to give time for delete to occur
+//				new File(MWUrls.M_MW_CACHE).list();
+//			}
 			// updated used Util objects
 			Scheduled.updateUtilObjects(sce.getServletContext());
 		}

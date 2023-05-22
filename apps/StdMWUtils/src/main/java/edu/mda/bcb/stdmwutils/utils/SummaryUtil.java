@@ -1,4 +1,4 @@
-// Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -49,16 +49,24 @@ public class SummaryUtil
 	static public SummaryUtil updateSummaryUtil(String theTimeStamp) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
 		// TODO: check for newest summary file, and download new and compare to old
-		File outDir = new File(MWUrls.M_MW_CACHE, theTimeStamp);
+		File outDir = new File(MWUrls.M_MWB_CACHE, theTimeStamp);
 		SummaryUtil su = new SummaryUtil();
-		su.fetchSummaries();
+		File existing = new File(outDir, MWUrls.M_STUDIES);
+		if (existing.exists())
+		{
+			su.readSummaries(outDir);
+		}
+		else
+		{
+			su.fetchSummaries();
+		}
 		su.writeSummaries(outDir);
 		return su;
 	}
 
 	static public SummaryUtil readNewestSummaryFile() throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
-		File timestampDir = MWUrls.findNewestDir(new File(MWUrls.M_MW_CACHE));
+		File timestampDir = MWUrls.findNewestDir(new File(MWUrls.M_MWB_CACHE));
 		SummaryUtil su = new SummaryUtil();
 		su.readSummaries(timestampDir);
 		return su;
@@ -97,7 +105,14 @@ public class SummaryUtil
 				JsonObject sumObj = entry.getValue().getAsJsonObject();
 				Summary summary = gson.fromJson(sumObj, Summary.class);
 				summary.init();
-				mDataMap.put(summary.hash, summary);
+				if (null!=mDataMap.get(summary.hash))
+				{
+					StdMwDownload.printLn("fetchSummaries - skip duplicate entry for Study (introduced to MWB ~2022-04) " + summary.study_id);
+				}
+				else
+				{
+					mDataMap.put(summary.hash, summary);
+				}
 			}
 			StdMwDownload.printLn("fetchSummaries - finished iterating");
 		}
@@ -117,12 +132,22 @@ public class SummaryUtil
 				bw.newLine();
 				StdMwDownload.printLn("writeSummaries - iterate summaries");
 				TreeSet<Summary> sortedSummaries = mDataMap.getAll();
+				int cnt = 0;
 				for (Summary summary : sortedSummaries)
 				{
-					System.out.print(".");
+					if (0 == cnt % 100)
+					{
+						System.out.print(".");
+					}
 					bw.write(summary.getRowString());
 					bw.newLine();
 					bw.flush();
+					cnt += 1;
+					if (cnt > 10000)
+					{
+						System.out.println(".");
+						cnt = 0;
+					}
 				}
 				System.out.println(".");
 				StdMwDownload.printLn("writeSummaries - finished iterating");

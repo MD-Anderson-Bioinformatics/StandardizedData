@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+ *  Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
  *  
  *  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
  *  
@@ -31,8 +31,10 @@ import java.nio.file.StandardOpenOption;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.TreeSet;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 /**
@@ -44,17 +46,25 @@ public class RefMetUtil
 	static public RefMetUtil updateRefMetUtil(String theTimeStamp) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
 		// TODO: check for newest refMet file, and download new and compare to old
-		File outDir = new File(MWUrls.M_MW_CACHE, theTimeStamp);
-		File inCSV = new File(MWUrls.M_MW_CACHE, "refmet.csv");
+		File outDir = new File(MWUrls.M_MWB_CACHE, theTimeStamp);
+		File inCSV = new File(MWUrls.M_MWB_CACHE, "refmet.csv");
 		RefMetUtil ru = new RefMetUtil();
-		ru.fetchRefMet(inCSV);
+		File existing = new File(outDir, MWUrls.M_REFMET);
+		if (existing.exists())
+		{
+			ru.readRefMet(outDir);
+		}
+		else
+		{
+			ru.fetchRefMet(inCSV);
+		}
 		ru.writeRefMet(outDir);
 		return ru;
 	}
 
 	static public RefMetUtil readNewestRefMetFile() throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
-		File timestampDir = MWUrls.findNewestDir(new File(MWUrls.M_MW_CACHE));
+		File timestampDir = MWUrls.findNewestDir(new File(MWUrls.M_MWB_CACHE));
 		RefMetUtil ru = new RefMetUtil();
 		ru.readRefMet(timestampDir);
 		return ru;
@@ -81,9 +91,11 @@ public class RefMetUtil
 	{
 		StdMwDownload.printLn("fetchRefMet - iterate file");
 		//" refmet_name",super_class,main_class,sub_class,formula,exactmass,inchi_key,pubchem_cid
-		try(Reader in = new FileReader(theIn))
+		try(Reader reader = new FileReader(theIn))
 		{
-			Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().withIgnoreEmptyLines().parse(in);
+			CSVFormat format = CSVFormat.newFormat(',').withQuote('"').withFirstRecordAsHeader().withIgnoreEmptyLines();
+			CSVParser parser = new CSVParser(reader, format);
+			List<CSVRecord> records = parser.getRecords();
 			int counter = 0;
 			try
 			{
@@ -132,12 +144,22 @@ public class RefMetUtil
 				bw.newLine();
 				StdMwDownload.printLn("writeRefMet - iterate refmets");
 				TreeSet<RefMet> fullSet = mDataMap.getAll();
+				int cnt = 0;
 				for (RefMet refMet : fullSet)
 				{
-					System.out.print(".");
+					if (0 == cnt % 1000)
+					{
+						System.out.print(".");
+					}
 					bw.write(refMet.getRowString());
 					bw.newLine();
 					bw.flush();
+					cnt += 1;
+					if (cnt > 100000)
+					{
+						System.out.println(".");
+						cnt = 0;
+					}
 				}
 				System.out.println(".");
 				StdMwDownload.printLn("writeRefMet - finished iterating");

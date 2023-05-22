@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+ *  Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
  *  
  *  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
  *  
@@ -21,7 +21,6 @@ import edu.mda.bcb.stdmwutils.utils.MetaboliteUtil;
 import edu.mda.bcb.stdmwutils.utils.SummaryUtil;
 import edu.mda.bcb.stdmwutils.utils.RefMetUtil;
 import edu.mda.bcb.stdmwutils.utils.OtherIdsUtil;
-import edu.mda.bcb.stdmwutils.validate.ValidateUtil;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -54,7 +53,7 @@ public class Scheduled implements Runnable
 			}
 			Load.mQueue.clearExpired();
 			// remove ZIPs if present
-			File dataDir = new File(MWUrls.M_MW_ZIPTMP);
+			File dataDir = new File(MWUrls.M_MWB_TEMP);
 			if (dataDir.exists())
 			{
 				mSC.log("Scheduled::Run clean old data " + MWUrls.M_VERSION);
@@ -70,8 +69,8 @@ public class Scheduled implements Runnable
 				}
 			}
 			// update live dir
-			mSC.log("Scheduled::Run updateLiveDir " + MWUrls.M_VERSION);
-			updateLiveDir();
+			// remove live, unstable - mSC.log("Scheduled::Run updateLiveDir " + MWUrls.M_VERSION);
+			// remove live, unstable - updateLiveDir();
 			// updated used Util objects
 			mSC.log("Scheduled::Run updateUtilObjects " + MWUrls.M_VERSION);
 			Scheduled.updateUtilObjects(mSC);
@@ -82,46 +81,46 @@ public class Scheduled implements Runnable
 		}
 	}
 	
-	protected void updateLiveDir() throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
-	{
-		File currentDir = MWUrls.findNewestDir(new File(MWUrls.M_MW_CACHE));
-		// remove live dir if present
-		File liveDir = new File(MWUrls.M_MW_CACHE, "live");
-		if (liveDir.exists())
-		{
-			mSC.log("Scheduled::updateLiveDir remove livedir" + liveDir.getAbsolutePath());
-			FileUtils.deleteQuietly(liveDir);
-		}
-		liveDir.mkdir();
-		liveDir.list();
-		// TODO: this is a hack - sometimes mkdir seems to fail "magically" on network mounted drives
-		if (liveDir.exists())
-		{
-			mSC.log("Scheduled::updateLiveDir confirmed " + liveDir.getAbsolutePath());
-		}
-		else
-		{
-			mSC.log("Scheduled::updateLiveDir dir missing " + liveDir.getAbsolutePath());
-			throw new StdMwException("Scheduled::updateLiveDir dir missing " + liveDir.getAbsolutePath());
-		}
-		FileUtils.copyDirectory(currentDir, liveDir);
-		mSC.log("Scheduled::updateLiveDir Build New Utils " + liveDir.getAbsolutePath());
-		SummaryUtil su = SummaryUtil.updateSummaryUtil("live");
-		AnalysisUtil au = AnalysisUtil.updateAnalysisUtil("live", su);
-		MetaboliteUtil mu = MetaboliteUtil.updateMetaboliteUtil("live", au);
-		RefMetUtil ru = RefMetUtil.updateRefMetUtil("live");
-		OtherIdsUtil ou = OtherIdsUtil.updateOtherIdsUtil("live", ru, mu);
-		ValidateUtil vu = new ValidateUtil(mu, ru, ou);
-		if (false==vu.validate("live", au.getRandomIds()))
-		{
-			mSC.log("Scheduled::updateLiveDir LiveDir run failed to pass validate");
-			FileUtils.deleteQuietly(liveDir);
-		}
-		else
-		{
-			mSC.log("Scheduled::updateLiveDir LiveDir run passed validate");
-		}
-	}
+//	protected void updateLiveDir() throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
+//	{
+//		File currentDir = MWUrls.findNewestDir(new File(MWUrls.M_MW_CACHE));
+//		// remove live dir if present
+//		File liveDir = new File(MWUrls.M_MW_CACHE, "live");
+//		if (liveDir.exists())
+//		{
+//			mSC.log("Scheduled::updateLiveDir remove livedir" + liveDir.getAbsolutePath());
+//			FileUtils.deleteQuietly(liveDir);
+//		}
+//		liveDir.mkdir();
+//		liveDir.list();
+//		// TODO: this is a hack - sometimes mkdir seems to fail "magically" on network mounted drives
+//		if (liveDir.exists())
+//		{
+//			mSC.log("Scheduled::updateLiveDir confirmed " + liveDir.getAbsolutePath());
+//		}
+//		else
+//		{
+//			mSC.log("Scheduled::updateLiveDir dir missing " + liveDir.getAbsolutePath());
+//			throw new StdMwException("Scheduled::updateLiveDir dir missing " + liveDir.getAbsolutePath());
+//		}
+//		FileUtils.copyDirectory(currentDir, liveDir);
+//		mSC.log("Scheduled::updateLiveDir Build New Utils " + liveDir.getAbsolutePath());
+//		SummaryUtil su = SummaryUtil.updateSummaryUtil("live");
+//		AnalysisUtil au = AnalysisUtil.updateAnalysisUtil("live", su);
+//		MetaboliteUtil mu = MetaboliteUtil.updateMetaboliteUtil("live", au);
+//		RefMetUtil ru = RefMetUtil.updateRefMetUtil("live");
+//		OtherIdsUtil ou = OtherIdsUtil.updateOtherIdsUtil("live", ru, mu);
+//		ValidateUtil vu = new ValidateUtil(mu, ru, ou);
+//		if (false==vu.validate("live", au.getRandomIds()))
+//		{
+//			mSC.log("Scheduled::updateLiveDir LiveDir run failed to pass validate");
+//			FileUtils.deleteQuietly(liveDir);
+//		}
+//		else
+//		{
+//			mSC.log("Scheduled::updateLiveDir LiveDir run passed validate");
+//		}
+//	}
 	
 	static private SummaryUtil mSummary = null;
 	static private AnalysisUtil mAnalysis = null;

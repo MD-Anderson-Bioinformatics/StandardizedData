@@ -1,4 +1,4 @@
-# this is the docker-compose version
+# this is the docker compose version
 version: '3.0'
 
 # file version BEA_VERSION_TIMESTAMP
@@ -24,8 +24,8 @@ services:
         image: <IMAGEURL>
         volumes:
             # outside access for data files outside:inside
-            - <CONFIGPATH>:/SMW/MW_CACHE:ro
-            - <ZIPTMPPATH>:/SMW/MW_ZIP
+            - <CONFIGPATH>:/MWB/MW_CACHE:ro
+            - <ZIPTMPPATH>:/MWB/MW_TMP
             - <LOGPATH>:/opt/tomcat/logs
             # read-only file to set time to same in image as on server
             - /etc/localtime:/etc/localtime:ro

@@ -1,4 +1,4 @@
-// Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -115,7 +115,6 @@ public final class Matrix
 				builder.standIn);
 	}
 
-
 	static public String checkname_contents(String theName)
 	{
 		// duplicates R make.names functionality
@@ -128,6 +127,18 @@ public final class Matrix
 		}
 		return(theName);
 	}
+
+//	static public String check_batch_type(String theName)
+//	{
+//		// only contains letters, numbers -- replace everything else with empty string
+//		theName = theName.replaceAll("[^a-zA-Z0-9]", "");
+//		// if name starts with number, prepend with "X"
+//		if (theName.matches("^\\d"))
+//		{
+//			theName = "X" + theName;
+//		}
+//		return(theName);
+//	}
 
 	/**
 	 * Read the data file's first line, parse the headers, and store as Header
@@ -558,6 +569,23 @@ public final class Matrix
 				throw new IllegalArgumentException("Filter axis must be 0 (row-wise) or 1 (column-wise)");
 		}
 	}
+	
+//	public static boolean fixBatchTypes(Matrix theMatrix)
+//	{
+//		boolean changed = false;
+//		ArrayList<Header> batchTypes = theMatrix.getColumns();
+//		for (int i = 0; i < batchTypes.size(); i++)
+//		{
+//			String bt_orig = batchTypes.get(i).label;
+//			String bt_fixd = check_batch_type(bt_orig);
+//			if (!bt_fixd.equals(bt_orig))
+//			{
+//				batchTypes.get(i).label = bt_fixd;
+//				changed = true;
+//			}
+//		}
+//		return changed;
+//	}
 
 	/**
 	 * Write a current Matrix instance to the same path it was built form.

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+ *  Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
  *  
  *  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
  *  
@@ -71,7 +71,7 @@ public class MWAPI
 		}
 	};
 	
-	protected ArrayList<ProcessEntry> processableCacheEntries(String theTimestamp) throws NoSuchAlgorithmException
+	protected ArrayList<ProcessEntry> processableCacheEntries(String theTimestamp, ProcessUtil thePU) throws NoSuchAlgorithmException
 	{
 		// get list of processable datasets from exising MW CACHE
 		ArrayList<ProcessEntry> peList = new ArrayList<>();
@@ -91,8 +91,16 @@ public class MWAPI
 						// remove elements that do not have downloads
 						if (mt.metabolite_count > 0)
 						{
-							//StdMwDownload.printLn("MWAPI::processableCacheEntries - metabolite_count = " + mt.metabolite_count);
-							peList.add(new ProcessEntry(an, su, theTimestamp, ProcessUtil.M_STATUS_NEW, null));
+							// check to see if dataset NEEDS processing
+							if(false==thePU.doesThisExist(mt))
+							{
+								StdMwDownload.printLn("MWAPI::processableCacheEntries - usable analysis=" + mt.analysis.analysis_id + " study=" + mt.analysis.study_id);
+								peList.add(new ProcessEntry(an, su, theTimestamp, ProcessUtil.M_STATUS_NEW, null));
+							}
+							else
+							{
+								StdMwDownload.printLn("MWAPI::processableCacheEntries - skip analysis=" + mt.analysis.analysis_id + " study=" + mt.analysis.study_id);
+							}
 						}
 					}
 				}
@@ -110,10 +118,10 @@ public class MWAPI
 	
 	public void processPipeline(int theSize, String theTimestamp) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException, Exception
 	{
-		// get list of processable datasets from exising MW CACHE
-		ArrayList<ProcessEntry> peList = processableCacheEntries(theTimestamp);
 		// check list to see if processing is done, if so, add the next theSize elements from sumList that are not in the processList
 		ProcessUtil pu = ProcessUtil.readNewestProcessFile(mMu, mRu, mOu);
+		// get list of processable datasets from exising MW CACHE
+		ArrayList<ProcessEntry> peList = processableCacheEntries(theTimestamp, pu);
 		// add theSize number of entries to pu and update process index on disk
 		pu.addNewEntries(peList, theSize);
 		pu.writeProcesses();

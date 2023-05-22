@@ -2,8 +2,9 @@
 GDC references files are listed at:
 https://gdc.cancer.gov/about-data/data-harmonization-and-generation/gdc-reference-files"
 Current files in data were downloaded 2018-01-18-0915"
+Except v36 was downloaded 2022-03-31-0930
 mirna_mature.txt - (edited) contains only the HSA entries from miRNA database
-gencode.v22.annotation.gtf - RNASeq (GeneExpressionQuantification) and HTSeq
+gencode.v*.annotation.gtf - RNASeq (GeneExpressionQuantification) and HTSeq
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 HGNC reference files downloaded from:
 ftp.ebi.ac.uk:/pub/databases/genenames/hgnc_complete_set.txt.gz

@@ -1,4 +1,4 @@
-// Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -8,11 +8,11 @@
 //
 // MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 // MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
-
 package edu.mda.bcb.stdmw.servlets;
 
 import edu.mda.bcb.stdmw.startup.Load;
 import edu.mda.bcb.stdmw.startup.Scheduled;
+import edu.mda.bcb.stdmw.utils.ScanCheck;
 import edu.mda.bcb.stdmwutils.mwdata.Analysis;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import edu.mda.bcb.stdmwutils.utils.AnalysisUtil;
@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 })
 public class ZipConversion extends HttpServlet
 {
+
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
 	 * methods.
@@ -50,64 +51,75 @@ public class ZipConversion extends HttpServlet
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException
 	{
-		log("Before Sync Block for Servlet ZipConversion " + MWUrls.M_VERSION);
-		// get new job id, -1 means queue too long try again in 5 min
-		long jobId = Load.mQueue.newJob();
-		log("jobId=" + jobId);
-		if (jobId<0)
+		try
 		{
-			// return queue too long try again
-			response.setContentType("application/text;charset=UTF-8");
-			try (OutputStream out = response.getOutputStream())
+			ScanCheck.checkForSecurity(request);
+			ScanCheck.checkForMetaCharacters(request.getParameter("hash"));
+			log("Before Sync Block for Servlet ZipConversion " + MWUrls.M_VERSION);
+			// get new job id, -1 means queue too long try again in 5 min
+			long jobId = Load.mQueue.newJob();
+			log("jobId=" + jobId);
+			if (jobId < 0)
 			{
-				out.write("MSG: Queue is too long. Please try again later.".getBytes());
-			}
-		}
-		else
-		{
-			// return job id
-			response.setContentType("application/text;charset=UTF-8");
-			try (OutputStream out = response.getOutputStream())
-			{
-				out.write(Long.toString(jobId).getBytes());
-			}
-			synchronized(ZipConversion.class)
-			{
-				log("jobId=" + jobId);
-				if (Load.mQueue.isGood(jobId))
+				// return queue too long try again
+				response.setContentType("application/text;charset=UTF-8");
+				try (OutputStream out = response.getOutputStream())
 				{
-					try
-					{
-						log("Servlet ZipConversion " + MWUrls.M_VERSION);
-						String hash = request.getParameter("hash");
-						AnalysisUtil analysisUtil = Scheduled.getAnalysis();
-						Analysis analysis = analysisUtil.getAnalysis(hash);
-						if (null!=analysis)
-						{
-							MetaboliteUtil metaUtil = Scheduled.getMetaUtil();
-							RefMetUtil refmetUtil = Scheduled.getRefmetUtil();
-							OtherIdsUtil otherIdsUtil = Scheduled.getOtherIdsUtil();
-							DownloadConvertSingle dcs = new DownloadConvertSingle(analysis, analysisUtil, refmetUtil, otherIdsUtil, metaUtil);
-							// returns mAnalysis.hash only
-							String zip = dcs.dAndC();
-							log("Servlet ZipConversion mQueue finish jobid=" + jobId + " and zip=" + zip);
-							Load.mQueue.finish(jobId, zip);
-						}
-						else
-						{
-							throw new Exception("No analysis found");
-						}
-						log("Servlet ZipConversion returning");
-					}
-					catch (Exception exp)
-					{
-						log("ZipConversion", exp);
-						response.setStatus(400);
-						response.sendError(400);
-					}
+					out.write("MSG: Queue is too long. Please try again later.".getBytes());
 				}
 			}
-			log("After Sync Block for Servlet ZipConversion " + MWUrls.M_VERSION);
+			else
+			{
+				// return job id
+				response.setContentType("application/text;charset=UTF-8");
+				try (OutputStream out = response.getOutputStream())
+				{
+					out.write(Long.toString(jobId).getBytes());
+				}
+				synchronized (ZipConversion.class)
+				{
+					log("jobId=" + jobId);
+					if (Load.mQueue.isGood(jobId))
+					{
+						try
+						{
+							log("Servlet ZipConversion " + MWUrls.M_VERSION);
+							String hash = request.getParameter("hash");
+							AnalysisUtil analysisUtil = Scheduled.getAnalysis();
+							Analysis analysis = analysisUtil.getAnalysis(hash);
+							if (null != analysis)
+							{
+								MetaboliteUtil metaUtil = Scheduled.getMetaUtil();
+								RefMetUtil refmetUtil = Scheduled.getRefmetUtil();
+								OtherIdsUtil otherIdsUtil = Scheduled.getOtherIdsUtil();
+								DownloadConvertSingle dcs = new DownloadConvertSingle(analysis, analysisUtil, refmetUtil, otherIdsUtil, metaUtil);
+								// returns mAnalysis.hash only
+								String zip = dcs.dAndC();
+								log("Servlet ZipConversion mQueue finish jobid=" + jobId + " and zip=" + zip);
+								Load.mQueue.finish(jobId, zip);
+							}
+							else
+							{
+								throw new Exception("No analysis found");
+							}
+							log("Servlet ZipConversion returning");
+						}
+						catch (Exception exp)
+						{
+							log("ZipConversion", exp);
+							response.setStatus(400);
+							response.sendError(400);
+						}
+					}
+				}
+				log("After Sync Block for Servlet ZipConversion " + MWUrls.M_VERSION);
+			}
+		}
+		catch (Exception exp)
+		{
+			log("ZipConversion", exp);
+			response.setStatus(400);
+			response.sendError(400);
 		}
 	}
 

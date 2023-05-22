@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+ *  Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
  *  
  *  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
  *  
@@ -13,13 +13,14 @@
  */
 package edu.mda.bcb.stdmwutils.std;
 
-import edu.mda.bcb.gdc.api.indexes.JsonDataset;
 import edu.mda.bcb.samval.SamplesValidationUtil;
 import edu.mda.bcb.samval.matrix.Builder;
 import edu.mda.bcb.samval.matrix.Matrix;
 import edu.mda.bcb.stdmwutils.StdMwDownload;
 import edu.mda.bcb.stdmwutils.StdMwException;
+import edu.mda.bcb.stdmwutils.indexes.JsonDataset;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
+import edu.mda.bcb.stdmwutils.mwdata.MwTable;
 import edu.mda.bcb.stdmwutils.utils.DatatableUtil;
 import edu.mda.bcb.stdmwutils.utils.FactorUtil;
 import edu.mda.bcb.stdmwutils.utils.MetaboliteMapUtil;
@@ -57,7 +58,7 @@ public class ProcessUtil
 	
 	static public ProcessUtil readNewestProcessFile(MetaboliteUtil theMu, RefMetUtil theRu, OtherIdsUtil theOu) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
-		File processIndex = new File(new File(MWUrls.M_MW_PIPELINE, "INDEX"), "mw_process.tsv");
+		File processIndex = new File(MWUrls.M_MWB_INDEXES, "mwb_process.tsv");
 		ProcessUtil pu = new ProcessUtil(theMu, theRu, theOu);
 		pu.readProcesses(processIndex);
 		return pu;
@@ -102,7 +103,7 @@ public class ProcessUtil
 	public void writeProcesses() throws IOException
 	{
 		OpenOption[] options = new OpenOption[] { StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING };
-		File processIndex = new File(new File(MWUrls.M_MW_PIPELINE, "INDEX"), "mw_process.tsv");
+		File processIndex = new File(MWUrls.M_MWB_INDEXES, "mwb_process.tsv");
 		if (mHashToProcessEntries.size()>0)
 		{
 			StdMwDownload.printLn("writeProcesses - write to " + processIndex.getAbsolutePath());
@@ -112,12 +113,22 @@ public class ProcessUtil
 				bw.newLine();
 				StdMwDownload.printLn("writeAnalyses - iterate summaries");
 				TreeSet<ProcessEntry> fullSet = new TreeSet<>(mHashToProcessEntries.values());
+				int cnt = 0;
 				for (ProcessEntry pe : fullSet)
 				{
-					System.out.print(".");
+					if (0 == cnt % 100)
+					{
+						System.out.print(".");
+					}
 					bw.write(pe.getRowString());
 					bw.newLine();
 					bw.flush();
+					cnt += 1;
+					if (cnt > 10000)
+					{
+						System.out.println(".");
+						cnt = 0;
+					}
 				}
 				System.out.println(".");
 				StdMwDownload.printLn("writeAnalyses - finished iterating");
@@ -151,18 +162,21 @@ public class ProcessUtil
 				{
 					if (pe.mStatus.equals(ProcessUtil.M_STATUS_NEW))
 					{
+						StdMwDownload.printLn("processPending downloadDataOptions=" + pe.mAn.analysis_id);
 						// do download
 						downloadDataOptions(pe, theTimestamp);
 						this.writeProcesses();
 					}
 					if (pe.mStatus.equals(ProcessUtil.M_STATUS_DOWNLOADED))
 					{
+						StdMwDownload.printLn("processPending convertDataOptions=" + pe.mAn.analysis_id);
 						// do convert
 						convertDataOptions(pe);
 						this.writeProcesses();
 					}
 					if (pe.mStatus.equals(ProcessUtil.M_STATUS_CONVERTED))
 					{
+						StdMwDownload.printLn("processPending cleanupDataOptions=" + pe.mAn.analysis_id);
 						// set to completed
 						cleanupDataOptions(pe);
 						pe.mStatus = ProcessUtil.M_STATUS_SUCCESS;
@@ -190,19 +204,39 @@ public class ProcessUtil
 		return col;
 	}
 	
-	public File getZipDir(ProcessEntry thePe)
+	public File getDataVersionedDir(ProcessEntry thePe, boolean theMakeDir)
 	{
-		File dataDir = new File(MWUrls.M_MW_PIPELINE, "DATA");
+		File dataDir = getZipPath(thePe);
+		File versionsDir = new File(dataDir, "versions");
+		File dataversionDir = new File(versionsDir, "DATA_" + thePe.mTimestamp);
+		if (theMakeDir)
+		{
+			dataversionDir.mkdirs();
+		}
+		return dataversionDir;
+	}
+	
+	public File getZipPath(ProcessEntry thePe)
+	{
+		File dataDir = new File(MWUrls.M_MWB_CONVERTED);
 		// directory for this data -- multiple levels, to avoid all at top
-		File anDir = new File(dataDir, thePe.mAn.hash.substring(0,2));
-		File suDir = new File(anDir, thePe.mSu.hash.substring(0,2));
-		File dldDir = new File(suDir, thePe.mHash);
+		// this gives a human readable path and no more than 100 files in a directory
+		// ST001386	AN002314 
+		// study first 5 characters
+		// study 6th character
+		// analysis first 5 characters
+		// analysis 6th character
+		File suDir1 = new File(dataDir, thePe.mSu.study_id.substring(0,5));
+		File suDir2 = new File(suDir1, thePe.mSu.study_id.substring(5,6));
+		File anDir1 = new File(suDir2, thePe.mAn.analysis_id.substring(0,5));
+		File anDir2 = new File(anDir1, thePe.mAn.analysis_id.substring(5,6));
+		File dldDir = new File(anDir2, thePe.mAn.analysis_id);
 		return dldDir;
 	}
 	
 	public void convertDataOptions(ProcessEntry thePe) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException, Exception
 	{
-		File dldDir = getZipDir(thePe);
+		File dldDir = getDataVersionedDir(thePe, false);
 		// files containing data in different format options
 		File dropFile = new File(dldDir, "drop_data.tsv");
 		File mergeFile = new File(dldDir, "merge_data.tsv");
@@ -235,13 +269,12 @@ public class ProcessUtil
 		if (null==useMe)
 		{
 			StdMwDownload.printWarn("No usable data file for " + thePe.mAn.analysis_id + " -- " + thePe.mSu.study_id);
-			// set convert failed
-			thePe.mStatus = M_STATUS_FAILED;
+			thePe.mStatus = M_STATUS_CONVERTED;
 		}
 		else
 		{
 			// copy to matrix data and download time
-			FileUtils.copyFile(useMe, new File(dldDir, "matrix_data.tsv"));
+			FileUtils.copyFile(useMe, new File(dldDir, "matrix.tsv"));
 			FileUtils.copyFile(copyMe, new File(dldDir, "download.tsv"));
 			// create batches.tsv
 			// TODO: true==merge means sample and class were merged
@@ -256,7 +289,7 @@ public class ProcessUtil
 				boolean wrote = false;
 				try
 				{
-					int cols = convertBatchOptions(batchFile, batchesFile, new File(dldDir, "matrix_data.tsv"), "Samples", "Sample");
+					int cols = convertBatchOptions(batchFile, batchesFile, new File(dldDir, "matrix.tsv"), "Samples", "Sample");
 					if (cols>0)
 					{
 						wrote = true;
@@ -277,8 +310,8 @@ public class ProcessUtil
 						File rowColTypeFile = new File(dldDir, "row_col_types.tsv");
 						File ngchmLinkMapFile = new File(dldDir, "ngchm_link_map.tsv");
 						File metabolitesFile = new File(dldDir, "metabolites.tsv");
-						File metaboliteMapFile = new File(MWUrls.M_MW_CACHE, "metabolite_map.tsv");
-						linkouts = convertLinkOuts(rowColTypeFile, ngchmLinkMapFile, new File(dldDir, "matrix_data.tsv"), metabolitesFile, metaboliteMapFile);
+						File metaboliteMapFile = new File(MWUrls.M_MWB_CACHE, "metabolite_map.tsv");
+						linkouts = convertLinkOuts(rowColTypeFile, ngchmLinkMapFile, new File(dldDir, "matrix.tsv"), metabolitesFile, metaboliteMapFile);
 					}
 					catch(Exception exp)
 					{
@@ -287,11 +320,13 @@ public class ProcessUtil
 					if (true==linkouts)
 					{
 						// set convert done
+						StdMwDownload.printWarn("Converted");
 						thePe.mStatus = M_STATUS_CONVERTED;				
 					}
 					else
 					{
 						// set convert failed
+						StdMwDownload.printWarn("Convert LinkOuts Failed");
 						thePe.mStatus = M_STATUS_FAILED;
 					}
 				}
@@ -299,14 +334,14 @@ public class ProcessUtil
 				{
 					StdMwDownload.printLn("No usable batch types found");
 					// set convert failed
-					thePe.mStatus = M_STATUS_FAILED;
+					thePe.mStatus = M_STATUS_CONVERTED;
 				}
 			}
 			else
 			{
 				StdMwDownload.printWarn("No batch data file for " + thePe.mAn.analysis_id + " -- " + thePe.mSu.study_id);
 				// set convert failed
-				thePe.mStatus = M_STATUS_FAILED;
+				thePe.mStatus = M_STATUS_CONVERTED;
 			}
 		}
 	}
@@ -334,14 +369,7 @@ public class ProcessUtil
 	
 	public void downloadDataOptions(ProcessEntry thePe, String theTimestamp) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
-		File dataDir = new File(MWUrls.M_MW_PIPELINE, "DATA");
-		// directory for this data -- multiple levels, to avoid all at top
-		File anDir = new File(dataDir, thePe.mAn.hash.substring(0,2));
-		anDir.mkdir();
-		File suDir = new File(anDir, thePe.mSu.hash.substring(0,2));
-		suDir.mkdir();
-		File dldDir = new File(suDir, thePe.mHash);
-		dldDir.mkdir();
+		File dldDir = getDataVersionedDir(thePe, true);
 		try
 		{
 			// download all versions of data (Raw, Drop Class, Merge Sample-Class)
@@ -407,10 +435,7 @@ public class ProcessUtil
 	
 	public void cleanupDataOptions(ProcessEntry thePe) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
-		File dataDir = new File(MWUrls.M_MW_PIPELINE, "DATA");
-		File anDir = new File(dataDir, thePe.mAn.hash.substring(0,2));
-		File suDir = new File(anDir, thePe.mSu.hash.substring(0,2));
-		File dldDir = new File(suDir, thePe.mHash);
+		File dldDir = getDataVersionedDir(thePe, false);
 		// download all versions of data (Raw, Drop Class, Merge Sample-Class)
 		File rawFile = new File(dldDir, "raw_data.tsv");
 		if (rawFile.exists())
@@ -449,16 +474,26 @@ public class ProcessUtil
 		//	batchFile.delete();
 		//}
 		// json index "index.json"
-		File jsonindexFile = new File(dldDir, "index.json");
+		File jsonindexFile = new File(dldDir.getParentFile().getParentFile(), "index.json");
 		JsonDataset jd = thePe.getJsonDataset(true);
 		jd.writeJson(jsonindexFile);
 		// zip directory
-		File [] files = ZipData.zip(dldDir, new File(dldDir, (thePe.mHash + ".zip")));
+		File [] files = ZipData.zip(dldDir, new File(dldDir.getParentFile().getParentFile(), thePe.getZipName()), false);
 		for (File myF : files)
 		{
-			if (myF.exists())
+			if (myF.isFile())
 			{
-				myF.delete();
+				if (myF.exists())
+				{
+					myF.delete();
+				}
+			}
+			else if (myF.isDirectory())
+			{
+				if (myF.exists())
+				{
+					FileUtils.deleteQuietly(myF);
+				}
 			}
 		}
 		thePe.mStatus = M_STATUS_DOWNLOADED;
@@ -575,16 +610,54 @@ public class ProcessUtil
 
 	public void updateStandardizedIndex() throws Exception
 	{
+		int cnt = 0;
 		for (ProcessEntry pe : mHashToProcessEntries.values())
 		{
+			if (0 == cnt % 100)
+			{
+				System.out.print(".");
+			}
 			if (pe.mStatus.equals(ProcessUtil.M_STATUS_SUCCESS))
 			{
 				// M_QUERY_INDEX
-				File dldDir = getZipDir(pe);
-				File zipFile = new File(dldDir, (pe.mHash + ".zip"));
-				JsonDataset jd = pe.getJsonDataset(true);
-				StdMwDownload.M_QUERY_INDEX.updateIndex(zipFile, pe.mHash, jd);
+				File dldDir = getZipPath(pe);
+				File zipFile = new File(dldDir, pe.getZipName());
+				if (!StdMwDownload.M_QUERY_INDEX.hasEntry(zipFile))
+				{
+					if (zipFile.exists())
+					{
+						JsonDataset jd = pe.getJsonDataset(true);
+						StdMwDownload.M_QUERY_INDEX.updateIndex(zipFile, pe.mHash, jd);
+					}
+					else
+					{
+						StdMwDownload.printWarn("updateStandardizedIndex skip dataset. No ZIP file analysis_id=" + pe.mAn.analysis_id);
+					}
+				}
+			}
+			cnt += 1;
+			if (cnt > 10000)
+			{
+				System.out.println(".");
+				cnt = 0;
 			}
 		}
+		System.out.println(".");
+	}
+	
+	public boolean doesThisExist(MwTable theMt)
+	{
+		boolean exists = false;
+		for (ProcessEntry pe : mHashToProcessEntries.values())
+		{
+			if (pe.mAn.analysis_id.equalsIgnoreCase(theMt.analysis.analysis_id))
+			{
+				if (pe.mAn.study_id.equalsIgnoreCase(theMt.analysis.study_id))
+				{
+					exists = true;
+				}
+			}
+		}
+		return exists;
 	}
 }

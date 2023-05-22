@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+ *  Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
  *  
  *  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
  *  
@@ -13,7 +13,7 @@
  */
 package edu.mda.bcb.stdmwutils.std;
 
-import edu.mda.bcb.gdc.api.indexes.JsonDataset;
+import edu.mda.bcb.stdmwutils.indexes.JsonDataset;
 import edu.mda.bcb.stdmwutils.mwdata.Analysis;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import edu.mda.bcb.stdmwutils.mwdata.Summary;
@@ -33,6 +33,11 @@ public class ProcessEntry implements Comparable<ProcessEntry>
 	public Summary mSu = null;
 	public String mTimestamp = null;
 	public String mStatus = null;
+	
+	public String getZipName()
+	{
+		return "MWB_" + mAn.study_id + "_" + mAn.analysis_id + ".zip";
+	}
 	
 	public ProcessEntry(Analysis theAn, Summary theSu, String theTimestamp, String theStatus, String theHash) throws NoSuchAlgorithmException
 	{
@@ -111,15 +116,14 @@ public class ProcessEntry implements Comparable<ProcessEntry>
 		// String theSource, String theVariant, 
 		// String theProject, String theSubProject, String theDataType, 
 		// String thePlatform, String theData, String theAlgorithm, String theDetails, String theVersion
-		JsonDataset jd = new JsonDataset("MW", "API", 
-				this.mAn.study_id,			// project
-				this.mAn.analysis_id,		// sub-project
-				this.mAn.instrument_type,	// data type
+		JsonDataset jd = new JsonDataset(
+				this.mAn.study_id,			// program
+				this.mAn.analysis_id,		// project
+				this.mAn.instrument_type,	// category
 				this.mAn.ion_mode,			// platform
-				"standardized",				// data
-				(theContinuousFlag?"continuous":"discrete"),	// algorithm
-				this.mSu.study_title,			// details
-				this.mTimestamp);
+				this.mSu.study_title,		// data
+				"Metabolomics-Workbench"    // details
+			);
 		return jd;
 	}
 }
