@@ -47,7 +47,7 @@ import java.util.TreeSet;
 public class MetaboliteUtil
 {
 
-	static public MetaboliteUtil updateMetaboliteUtil(String theTimeStamp, AnalysisUtil theAU) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
+	static public MetaboliteUtil updateMetaboliteUtil(String theTimeStamp, AnalysisUtil theAU, boolean theWrite) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
 		// TODO: check for newest file, and download new and compare to old
 		File outDir = new File(MWUrls.M_MWB_CACHE, theTimeStamp);
@@ -64,7 +64,10 @@ public class MetaboliteUtil
 				au.fetchMetabolites(ana.analysis_id);
 			}
 		}
-		au.writeMetabolites(outDir);
+		if (theWrite)
+		{
+			au.writeMetabolites(outDir);
+		}
 		return au;
 	}
 

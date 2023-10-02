@@ -23,11 +23,13 @@ public class MWUrls
 {
 
 	static public String M_VERSION = "StdMW BEA_VERSION_TIMESTAMP";
-	static public String M_MWB_CONVERTED = "/MWB/CONVERTED/";
-	static public String M_MWB_DOWNLOADED = "/MWB/DOWNLOADED/";
-	static public String M_MWB_INDEXES = "/MWB/INDEXES/";
-	static public String M_MWB_CACHE = "/MWB/MW_CACHE/";
-	static public String M_MWB_TEMP = "/MWB/MW_TMP/";
+	// *mapped-dir* <- used for searching for hard-coded paths
+	// not used in webiste StdMW
+	static public String M_MWB_CONVERTED = "/BEA/MWB/CONVERTED/";
+	static public String M_MWB_INDEXES = "/BEA/MWB/INDEXES/";
+	// used in website StdMW
+	static public String M_MWB_CACHE = "/BEA/MWB/MW_CACHE/";
+	static public String M_MWB_TEMP = "/BEA/MWB/MW_TMP/";
 
 	static public String M_STUDIES = "studies.tsv";
 	static public String M_ANALYSIS = "analysis.tsv";

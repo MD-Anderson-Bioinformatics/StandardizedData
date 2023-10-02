@@ -49,7 +49,7 @@ import java.util.TreeSet;
  */
 public class AnalysisUtil
 {
-	static public AnalysisUtil updateAnalysisUtil(String theTimeStamp, SummaryUtil theSU) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
+	static public AnalysisUtil updateAnalysisUtil(String theTimeStamp, SummaryUtil theSU, boolean theWrite) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
 		// TODO: check for newest summary file, and download new and compare to old
 		File outDir = new File(MWUrls.M_MWB_CACHE, theTimeStamp);
@@ -66,7 +66,10 @@ public class AnalysisUtil
 				au.fetchAnalyses(sum.hash, sum.study_id);
 			}
 		}
-		au.writeAnalyses(outDir);
+		if (theWrite)
+		{
+			au.writeAnalyses(outDir);
+		}
 		return au;
 	}
 	

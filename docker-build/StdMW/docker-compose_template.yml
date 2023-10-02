@@ -24,8 +24,8 @@ services:
         image: <IMAGEURL>
         volumes:
             # outside access for data files outside:inside
-            - <CONFIGPATH>:/MWB/MW_CACHE:ro
-            - <ZIPTMPPATH>:/MWB/MW_TMP
+            - <CONFIGPATH>:/BEA/MWB/MW_CACHE:ro
+            - <ZIPTMPPATH>:/BEA/MWB/MW_TMP
             - <LOGPATH>:/opt/tomcat/logs
             # read-only file to set time to same in image as on server
             - /etc/localtime:/etc/localtime:ro

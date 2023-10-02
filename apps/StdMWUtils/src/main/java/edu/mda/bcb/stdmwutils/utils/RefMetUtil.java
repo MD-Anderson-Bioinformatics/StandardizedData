@@ -43,7 +43,7 @@ import org.apache.commons.csv.CSVRecord;
  */
 public class RefMetUtil
 {
-	static public RefMetUtil updateRefMetUtil(String theTimeStamp) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
+	static public RefMetUtil updateRefMetUtil(String theTimeStamp, boolean theWrite) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
 		// TODO: check for newest refMet file, and download new and compare to old
 		File outDir = new File(MWUrls.M_MWB_CACHE, theTimeStamp);
@@ -58,7 +58,10 @@ public class RefMetUtil
 		{
 			ru.fetchRefMet(inCSV);
 		}
-		ru.writeRefMet(outDir);
+		if (theWrite)
+		{
+			ru.writeRefMet(outDir);
+		}
 		return ru;
 	}
 

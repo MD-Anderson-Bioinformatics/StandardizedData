@@ -136,20 +136,25 @@ public class ProcessUtil
 		}
 	}
 	
-	public void addNewEntries(ArrayList<ProcessEntry> puList, int theSize)
+	public long addNewEntries(ArrayList<ProcessEntry> puList, int theSize)
 	{
-		int count = 0;
+		long count = 0;
 		for (ProcessEntry pe : puList)
 		{
-			if (count<theSize)
+			if ((0==theSize)||(count<theSize))
 			{
 				if (!mHashToProcessEntries.containsKey(pe.mHash))
 				{
 					mHashToProcessEntries.put(pe.mHash, pe);
 					count += 1;
+					if (0==theSize)
+					{
+						StdMwDownload.printLn("New Data Study=" + pe.mAn.study_id + " Analysis=" + pe.mAn.analysis_id + " Data=" + pe.mSu.submit_date);
+					}
 				}
 			}
 		}
+		return count;
 	}
 	
 	public void processPending(String theTimestamp) throws IOException, NoSuchAlgorithmException, MalformedURLException, StdMwException, Exception

@@ -46,7 +46,7 @@ import java.util.TreeSet;
 public class SummaryUtil
 {
 
-	static public SummaryUtil updateSummaryUtil(String theTimeStamp) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
+	static public SummaryUtil updateSummaryUtil(String theTimeStamp, boolean theWrite) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
 		// TODO: check for newest summary file, and download new and compare to old
 		File outDir = new File(MWUrls.M_MWB_CACHE, theTimeStamp);
@@ -60,7 +60,10 @@ public class SummaryUtil
 		{
 			su.fetchSummaries();
 		}
-		su.writeSummaries(outDir);
+		if (true==theWrite)
+		{
+			su.writeSummaries(outDir);
+		}
 		return su;
 	}
 

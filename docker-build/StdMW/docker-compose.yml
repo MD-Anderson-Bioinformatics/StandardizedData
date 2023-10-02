@@ -1,0 +1,37 @@
+# this is the docker compose version
+version: '3.0'
+
+# file version 2023-09-22-1600
+
+networks:
+    # network for this compose stack
+    stdmw_network_hub:
+        driver: bridge
+#SUBNET        ipam:
+#SUBNET            config:
+#SUBNET            - subnet: 0
+services:
+    stdmw_service:
+        networks:
+            - stdmw_network_hub
+        # restart this container if it crashes
+        restart: always
+        build:
+            # build from directory in context and Dockerfile
+            context: .
+            dockerfile: Dockerfile
+        container_name: stdmw_cont_hub
+        image: mdabcb/stdmw:2023-09-22-1600
+        volumes:
+            # outside access for data files outside:inside
+            - /SMW/MW_CACHE:/BEA/MWB/MW_CACHE:ro
+            - /SMW/MW_ZIP:/BEA/MWB/MW_TMP
+            - /SMW/MW_LOGS:/opt/tomcat/logs
+            # read-only file to set time to same in image as on server
+            - /etc/localtime:/etc/localtime:ro
+        ports:
+            # (outside)host port:container port(inside) for Tomcat
+            # outside/host port is only set here (other docker compose have ports in more than one place)
+            - "8080:8080"
+        tty: true
+

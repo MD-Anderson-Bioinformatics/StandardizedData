@@ -7,3 +7,8 @@ apps/*/.Rbuildignore
 apps/*/.Rhistory
 data/apps_out/*
 data/testing_dynamic/*
+/apps/PlatformReleaseMaps/.gradle/
+/apps/PlatformReleaseMaps/target/
+/apps/StdMWUtils/target/
+/apps/GDCAPI/target/
+/apps/StdMW/target/

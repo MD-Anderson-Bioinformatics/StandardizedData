@@ -120,7 +120,7 @@ public class MWAPI
 	{
 		// check list to see if processing is done, if so, add the next theSize elements from sumList that are not in the processList
 		ProcessUtil pu = ProcessUtil.readNewestProcessFile(mMu, mRu, mOu);
-		// get list of processable datasets from exising MW CACHE
+		// get list of processable datasets from existing MW CACHE
 		ArrayList<ProcessEntry> peList = processableCacheEntries(theTimestamp, pu);
 		// add theSize number of entries to pu and update process index on disk
 		pu.addNewEntries(peList, theSize);
@@ -129,5 +129,16 @@ public class MWAPI
 		pu.processPending(theTimestamp);
 		// update the "completed" standardized MWB index
 		pu.updateStandardizedIndex();
+	}
+	
+	public void listProcessable(String theTimestamp) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException, Exception
+	{
+		// check list to see if processing is done, if so, add the next theSize elements from sumList that are not in the processList
+		ProcessUtil pu = ProcessUtil.readNewestProcessFile(mMu, mRu, mOu);
+		// get list of processable datasets from existing MW CACHE
+		ArrayList<ProcessEntry> peList = processableCacheEntries(theTimestamp, pu);
+		// add theSize number of entries to pu and update process index on disk
+		long count = pu.addNewEntries(peList, 0);
+		StdMwDownload.printLn(count + " new entries found");
 	}
 }

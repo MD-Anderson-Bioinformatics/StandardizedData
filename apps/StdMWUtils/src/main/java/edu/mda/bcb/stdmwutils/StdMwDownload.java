@@ -30,7 +30,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 /**
  *
@@ -45,10 +45,10 @@ public class StdMwDownload
 	public static void main(String[] args)
 	{
 		// uses directories specified in MWUrls
-		String myDataVersion = "2023-03-28";
+		String myDataVersion = "2023-06-08";
 		try
 		{
-			RefMetUtil.updateRefMetUtil(myDataVersion);
+			RefMetUtil.updateRefMetUtil(myDataVersion, true);
 			StdMwDownload.printLn("StdMwDownload Starting");
 			StdMwDownload.printLn(getVersion());
 			// use this for testing/development
@@ -73,11 +73,11 @@ public class StdMwDownload
 		StdMwDownload.printLn("#############################################################################################");
 		StdMwDownload.printLn("##################################normalCacheDownload########################################");
 		StdMwDownload.printLn("#############################################################################################");
-		SummaryUtil su = SummaryUtil.updateSummaryUtil(theDataVersion);
-		AnalysisUtil au = AnalysisUtil.updateAnalysisUtil(theDataVersion, su);
-		MetaboliteUtil mu = MetaboliteUtil.updateMetaboliteUtil(theDataVersion, au);
-		RefMetUtil ru = RefMetUtil.updateRefMetUtil(theDataVersion);
-		OtherIdsUtil ou = OtherIdsUtil.updateOtherIdsUtil(theDataVersion, ru, mu);
+		SummaryUtil su = SummaryUtil.updateSummaryUtil(theDataVersion, true);
+		AnalysisUtil au = AnalysisUtil.updateAnalysisUtil(theDataVersion, su, true);
+		MetaboliteUtil mu = MetaboliteUtil.updateMetaboliteUtil(theDataVersion, au, true);
+		RefMetUtil ru = RefMetUtil.updateRefMetUtil(theDataVersion, true);
+		OtherIdsUtil ou = OtherIdsUtil.updateOtherIdsUtil(theDataVersion, ru, mu, true);
 		ValidateUtil vu = new ValidateUtil(mu, ru, ou);
 		vu.validate(theDataVersion, au.getRandomIds());
 	}

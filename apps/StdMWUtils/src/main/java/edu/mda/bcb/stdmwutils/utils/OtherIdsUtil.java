@@ -48,7 +48,7 @@ import java.util.TreeSet;
 public class OtherIdsUtil
 {
 
-	static public OtherIdsUtil updateOtherIdsUtil(String theTimeStamp, RefMetUtil theRMU, MetaboliteUtil theMU) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
+	static public OtherIdsUtil updateOtherIdsUtil(String theTimeStamp, RefMetUtil theRMU, MetaboliteUtil theMU, boolean theWrite) throws IOException, MalformedURLException, NoSuchAlgorithmException, StdMwException
 	{
 		// TODO: check for newest file, and download new and compare to old
 		File outDir = new File(MWUrls.M_MWB_CACHE, theTimeStamp);
@@ -69,7 +69,10 @@ public class OtherIdsUtil
 				ou.fetchOtherIDs(pcid);
 			}
 		}
-		ou.writeMetabolites(outDir);
+		if (theWrite)
+		{
+			ou.writeMetabolites(outDir);
+		}
 		return ou;
 	}
 

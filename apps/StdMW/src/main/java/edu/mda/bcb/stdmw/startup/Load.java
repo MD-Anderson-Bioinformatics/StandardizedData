@@ -14,9 +14,9 @@ import edu.mda.bcb.stdmw.utils.FIFOQueue;
 import edu.mda.bcb.stdmwutils.StdMwDownload;
 import edu.mda.bcb.stdmwutils.mwdata.MWUrls;
 import java.io.File;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.annotation.WebListener;
 import org.apache.commons.io.FileUtils;
 
 /**

@@ -1,0 +1,106 @@
+FROM fedora:38
+
+# reminder, use {} around environmental variables, otherwise docker uses it as a literal
+
+LABEL edu.mda.bcb.name="Standardized Metabolomics Workbench Tool" \
+      edu.mda.bcb.sub="smw" \
+      edu.mda.bcb.smw.version="SMW_2023-09-22-1600" \
+      edu.mda.bcb.smw.log="/SMW/MW_LOGS" \
+      edu.mda.bcb.smw.start="-" \
+      edu.mda.bcb.smw.stop="-" \
+      edu.mda.bcb.smw.upcheck="-"
+
+####
+#### this dockerfile's user
+####
+
+# create and setup bcbuser
+# also, set permissions and ownerships on internal docker directories
+# set home to 777 so vignettes build with weird mkdir .texlive2018
+# bcbuser:bcbgroup are used for tomcat setup
+# create and setup bcbuser
+# also, set permissions and ownerships on internal docker directories
+RUN groupadd -g 2002 bcbgroup && \
+    useradd -l -s /bin/bash -d /home/bcbuser -u 2002 -g 2002 bcbuser && \
+    chown -R bcbuser:bcbgroup /home/bcbuser && \
+    chmod -R 777 /home/bcbuser
+
+####
+#### generic setup for OS
+####
+
+# set timezone to prevent R time warnings
+RUN ln -snf /usr/share/zoneinfo/US/Central /etc/localtime && echo "US/Central" > /etc/timezone
+ENV TZ=US/Central
+
+####
+#### Install/Setup Java 17 with variables
+####
+
+RUN dnf upgrade -y && \
+    dnf -y install java-17-openjdk java-17-openjdk-devel java-17-openjdk-headless && \
+    update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-17-openjdk/bin/java 1 && \
+    update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-17-openjdk/bin/javac 1 && \
+    update-alternatives --set java /usr/lib/jvm/java-17-openjdk/bin/java && \
+    update-alternatives --set javac /usr/lib/jvm/java-17-openjdk/bin/javac && \
+    dnf upgrade -y && \
+    dnf clean all
+
+# adding these variables fixes issue where registering Java with R (keeps getting "lost")
+ENV JAR=/usr/lib/jvm/java-17-openjdk/bin/jar 
+ENV JAVAH=/usr/lib/jvm/java-17-openjdk/bin/javac 
+ENV JAVA_LIBS="-L/usr/lib/jvm/java-17-openjdk/lib/server -ljvm" 
+ENV JAVA_CPPFLAGS="-I/usr/lib/jvm/java-17-openjdk/include -I/usr/lib/jvm/java-17-openjdk/include/linux" 
+ENV JAVA_LD_LIBRARY_PATH=/usr/lib/jvm/java-17-openjdk/lib/server
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk/
+ENV PATH=/usr/lib/jvm/java-17-openjdk/bin:$PATH
+ENV JAVA=/usr/lib/jvm/java-17-openjdk/bin/java
+ENV JAVAC=/usr/lib/jvm/java-17-openjdk/bin/javac
+ENV JAVAH=/usr/lib/jvm/java-17-openjdk/bin/javac
+ENV JAR=/usr/lib/jvm/java-17-openjdk/bin/jar
+ENV LD_LIBRARY_PATH=/usr/lib/jvm/java-17-openjdk/lib/server
+
+####
+#### Install/Setup Tomcat
+####
+
+# install Tomcat 10, set to run as bcbuser
+ENV TOMCAT_MAJOR=10 \
+    TOMCAT_VERSION=10.1.13 \
+    TOMCAT_HOME=/opt/tomcat \
+    CATALINA_HOME=/opt/tomcat \
+    CATALINA_OUT=/dev/null
+
+RUN curl -jksSL -o /tmp/apache-tomcat.tar.gz https://dlcdn.apache.org/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
+    gunzip /tmp/apache-tomcat.tar.gz && \
+    tar -C /opt -xf /tmp/apache-tomcat.tar && \
+    mv /opt/apache-tomcat-${TOMCAT_VERSION} ${TOMCAT_HOME} && \
+    rm -rf ${TOMCAT_HOME}/webapps/docs && \
+    rm -rf ${TOMCAT_HOME}/webapps/ROOT && \
+    rm -rf ${TOMCAT_HOME}/webapps/examples && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    chown -R bcbuser:bcbgroup ${TOMCAT_HOME} && \
+    ln -s /opt/apache-tomcat-${TOMCAT_VERSION} ${TOMCAT_HOME}
+
+####
+#### Customize Tomcat and install WebApp WAR
+####
+
+# copy installs
+# copy server.xml to start compression - may need to be merged with above later
+# also formats output for LOGREPORT
+COPY --chown=bcbuser:bcbgroup --chmod=755 installations/server.xml ${CATALINA_HOME}/conf/server.xml
+COPY --chown=bcbuser:bcbgroup --chmod=755 installations/web.xml ${CATALINA_HOME}/conf/web.xml
+
+# copy installs
+COPY --chown=bcbuser:bcbgroup --chmod=755 installations/StdMW.war ${CATALINA_HOME}/webapps/.
+
+####
+#### End of build steps
+####
+
+# switch from root to bcbuser user
+USER bcbuser
+
+CMD ["/opt/tomcat/bin/catalina.sh", "run"]
+
