@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 /**
  *
- * @author dqs_tcga_service
+ * @author Tod_Casasent
  */
 public class ScanCheck
 {
