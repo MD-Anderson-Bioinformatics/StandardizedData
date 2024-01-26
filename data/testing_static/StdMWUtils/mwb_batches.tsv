@@ -1,0 +1,89 @@
+Sample	Gender	Intervention	Progressor	Race	Time.Point
+1106-RV	F	Exer Only	P	W	RV
+1106-fu18	F	Exer Only	P	W	fu18
+1291-RV	M	Diet&Exer	P	W	RV
+1291-fu18	M	Diet&Exer	P	W	fu18
+1338-RV	M	Diet&Exer	N	B	RV
+1338-fu18	M	Diet&Exer	N	B	fu18
+1380-RV	F	Diet&Exer	N	W	RV
+1380-fu18	F	Diet&Exer	N	W	fu18
+1382-RV	F	Diet Only	N	W	RV
+1382-fu18	F	Diet Only	N	W	fu18
+1401-RV	M	Diet&Exer	N	W	RV
+1401-fu18	M	Diet&Exer	N	W	fu18
+1441-RV	M	Diet&Exer	P	W	RV
+1441-fu18	M	Diet&Exer	P	W	fu18
+1488-RV	M	Exer Only	P	B	RV
+1488-fu18	M	Exer Only	P	B	fu18
+1538-RV	M	Diet&Exer	N	W	RV
+1538-fu18	M	Diet&Exer	N	W	fu18
+1624-RV	M	Exer Only	P	W	RV
+1624-fu18	M	Exer Only	P	W	fu18
+1681-RV	M	Diet&Exer	P	W	RV
+1681-fu18	M	Diet&Exer	P	W	fu18
+1702-RV	F	Diet Only	N	W	RV
+1702-fu18	F	Diet Only	N	W	fu18
+1745-RV	F	Exer Only	P	B	RV
+1745-fu18	F	Exer Only	P	B	fu18
+1808-RV	M	Diet&Exer	P	W	RV
+1808-fu18	M	Diet&Exer	P	W	fu18
+1864-RV	F	Diet Only	N	W	RV
+1864-fu18	F	Diet Only	N	W	fu18
+1882-RV	M	Diet Only	N	B	RV
+1882-fu18	M	Diet Only	N	B	fu18
+1934-RV	F	Diet&Exer	P	W	RV
+1934-fu18	F	Diet&Exer	P	W	fu18
+2012-RV	F	Diet&Exer	P	W	RV
+2012-fu18	F	Diet&Exer	P	W	fu18
+2095-RV	F	Diet&Exer	P	W	RV
+2095-fu18	F	Diet&Exer	P	W	fu18
+2120-RV	M	Diet&Exer	N	W	RV
+2120-fu18	M	Diet&Exer	N	W	fu18
+2276-RV	F	Diet Only	P	W	RV
+2276-fu18	F	Diet Only	P	W	fu18
+2370-RV	F	Diet&Exer	N	W	RV
+2370-fu18	F	Diet&Exer	N	W	fu18
+2479-RV	F	Diet Only	N	W	RV
+2479-fu18	F	Diet Only	N	W	fu18
+2830-RV	F	Diet Only	P	B	RV
+2830-fu18	F	Diet Only	P	B	fu18
+2924-RV	F	Diet Only	P	W	RV
+2924-fu18	F	Diet Only	P	W	fu18
+2925-RV	F	Diet&Exer	N	W	RV
+2925-fu18	F	Diet&Exer	N	W	fu18
+2944-RV	F	Exer Only	N	W	RV
+2944-fu18	F	Exer Only	N	W	fu18
+3130-RV	F	Diet Only	N	W	RV
+3130-fu18	F	Diet Only	N	W	fu18
+3163-RV	F	Diet&Exer	N	W	RV
+3163-fu18	F	Diet&Exer	N	W	fu18
+3166-RV	F	Diet&Exer	N	W	RV
+3166-fu18	F	Diet&Exer	N	W	fu18
+3285-RV	M	Diet Only	N	W	RV
+3285-fu18	M	Diet Only	N	W	fu18
+3296-RV	F	Diet Only	N	W	RV
+3296-fu18	F	Diet Only	N	W	fu18
+3331-RV	F	Diet Only	P	W	RV
+3331-fu18	F	Diet Only	P	W	fu18
+3612-RV	F	Diet&Exer	P	B	RV
+3612-fu18	F	Diet&Exer	P	B	fu18
+3706-RV	F	Diet Only	P	W	RV
+3706-fu18	F	Diet Only	P	W	fu18
+3727-RV	F	Diet&Exer	N	W	RV
+3727-fu18	F	Diet&Exer	N	W	fu18
+3750-RV	F	Diet Only	P	W	RV
+3750-fu18	F	Diet Only	P	W	fu18
+3786-RV	F	Exer Only	N	W	RV
+3786-fu18	F	Exer Only	N	W	fu18
+3845-RV	M	Exer Only	P	W	RV
+3845-fu18	M	Exer Only	P	W	fu18
+3929-RV	F	Diet Only	P	W	RV
+3929-fu18	F	Diet Only	P	W	fu18
+3985-RV	F	Diet&Exer	P	W	RV
+3985-fu18	F	Diet&Exer	P	W	fu18
+3994-RV	M	Diet&Exer	N	W	RV
+3994-fu18	M	Diet&Exer	N	W	fu18
+4097-RV	F	Exer Only	P	W	RV
+4097-fu18	F	Exer Only	P	W	fu18
+4272-RV	F	Diet Only	N	B	RV
+4272-fu18	F	Diet Only	N	B	fu18

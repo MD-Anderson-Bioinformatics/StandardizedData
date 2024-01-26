@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+// Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 //
@@ -21,7 +21,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses(
 {
-	//EnsemblGeneMapTest.class, GDCIdentifiersTest.class
+	ApacheCsvTest.class
 })
 public class StdMWUtilsSuite
 {

@@ -4,7 +4,7 @@ FROM fedora:38
 
 LABEL edu.mda.bcb.name="Standardized Metabolomics Workbench Tool" \
       edu.mda.bcb.sub="smw" \
-      edu.mda.bcb.smw.version="SMW_2023-09-22-1600" \
+      edu.mda.bcb.smw.version="SMW_2024-01-26-1200" \
       edu.mda.bcb.smw.log="/SMW/MW_LOGS" \
       edu.mda.bcb.smw.start="-" \
       edu.mda.bcb.smw.stop="-" \
@@ -66,7 +66,7 @@ ENV LD_LIBRARY_PATH=/usr/lib/jvm/java-17-openjdk/lib/server
 
 # install Tomcat 10, set to run as bcbuser
 ENV TOMCAT_MAJOR=10 \
-    TOMCAT_VERSION=10.1.13 \
+    TOMCAT_VERSION=10.1.18 \
     TOMCAT_HOME=/opt/tomcat \
     CATALINA_HOME=/opt/tomcat \
     CATALINA_OUT=/dev/null
