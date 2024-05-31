@@ -1,15 +1,12 @@
 # this is the docker compose version
 version: '3.0'
 
-# file version 2024-01-26-1200
+# file version 2024-05-29-1000
 
 networks:
     # network for this compose stack
     stdmw_network_hub:
         driver: bridge
-#SUBNET        ipam:
-#SUBNET            config:
-#SUBNET            - subnet: 0
 services:
     stdmw_service:
         networks:
@@ -21,7 +18,7 @@ services:
             context: .
             dockerfile: Dockerfile
         container_name: stdmw_cont_hub
-        image: mdabcb/stdmw:2024-01-26-1200
+        image: mdabcb/stdmw:2024-05-29-1000
         volumes:
             # outside access for data files outside:inside
             - /SMW/MW_CACHE:/BEA/MWB/MW_CACHE:ro
